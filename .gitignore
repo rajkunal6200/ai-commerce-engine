@@ -1,0 +1,19 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+
+# Runtime state / local data
+intents.json
+audit_logs.json
+webhook_events.json
+
+# macOS
+.DS_Store

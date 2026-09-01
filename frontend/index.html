@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Commerce Engine</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =========================================
+         APP
+    ========================================== -->
+
+    <div class="app">
+
+        <!-- =====================================
+             SIDEBAR
+        ====================================== -->
+
+        <aside class="sidebar">
+
+            <div class="brand">
+
+                <div class="brand-icon">
+                    ✦
+                </div>
+
+                <div>
+                    <div class="brand-name">
+                        Commerce AI
+                    </div>
+
+                    <div class="brand-subtitle">
+                        Autonomous Shopping
+                    </div>
+                </div>
+
+            </div>
+
+
+            <nav class="navigation">
+
+                <button
+                    class="nav-item active"
+                    id="newChatButton"
+                    type="button"
+                >
+                    <span>＋</span>
+                    New Shopping Session
+                </button>
+
+                <button
+                    class="nav-item"
+                    id="ordersButton"
+                    type="button"
+                >
+                    <span>◷</span>
+                    Orders
+                </button>
+
+            </nav>
+
+
+            <div class="security-card">
+
+                <div class="security-icon">
+                    ✓
+                </div>
+
+                <div class="security-content">
+
+                    <strong>
+                        Protected Commerce
+                    </strong>
+
+                    <span>
+                        Every purchase requires approval.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="sidebar-footer">
+
+                <span class="status-dot"></span>
+
+                AI Engine Online
+
+            </div>
+
+        </aside>
+
+
+        <!-- =====================================
+             MAIN AREA
+        ====================================== -->
+
+        <main class="main">
+
+            <!-- HEADER -->
+
+            <header class="topbar">
+
+                <div>
+
+                    <div class="eyebrow">
+                        AI COMMERCE ENGINE
+                    </div>
+
+                    <h1>
+                        Your intelligent
+                        <span>shopping agent.</span>
+                    </h1>
+
+                </div>
+
+
+                <div class="connection-status">
+
+                    <span class="status-dot"></span>
+
+                    System operational
+
+                </div>
+
+            </header>
+
+
+            <!-- =================================
+                 CHAT AREA
+            ================================== -->
+
+            <section
+                class="chat-container"
+                id="chatContainer"
+            >
+
+                <!-- Welcome -->
+
+                <div
+                    class="welcome"
+                    id="welcomeScreen"
+                >
+
+                    <div class="welcome-badge">
+                        ✦ AI-powered commerce
+                    </div>
+
+                    <h2>
+                        What are you
+                        <span>looking for?</span>
+                    </h2>
+
+                    <p>
+                        Tell me what you need in natural language.
+                        I'll understand your requirements, find the
+                        best match, and keep every purchase under
+                        your control.
+                    </p>
+
+
+                    <!-- Suggestion cards -->
+
+                    <div class="suggestions">
+
+                        <button
+                            class="suggestion-card"
+                            type="button"
+                            data-message="I need a wireless mouse for productivity under ₹3,000."
+                        >
+
+                            <span class="suggestion-icon">
+                                🖱️
+                            </span>
+
+                            <span>
+                                Wireless mouse
+                            </span>
+
+                            <small>
+                                Under ₹3,000
+                            </small>
+
+                        </button>
+
+
+                        <button
+                            class="suggestion-card"
+                            type="button"
+                            data-message="I need wireless headphones for work under ₹5,000."
+                        >
+
+                            <span class="suggestion-icon">
+                                🎧
+                            </span>
+
+                            <span>
+                                Work headphones
+                            </span>
+
+                            <small>
+                                Under ₹5,000
+                            </small>
+
+                        </button>
+
+
+                        <button
+                            class="suggestion-card"
+                            type="button"
+                            data-message="I need a laptop for development under ₹50,000."
+                        >
+
+                            <span class="suggestion-icon">
+                                💻
+                            </span>
+
+                            <span>
+                                Developer laptop
+                            </span>
+
+                            <small>
+                                Under ₹50,000
+                            </small>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Messages -->
+
+                <div
+                    class="messages"
+                    id="messages"
+                ></div>
+
+            </section>
+
+
+            <!-- =================================
+                 INPUT AREA
+            ================================== -->
+
+            <section class="composer-wrapper">
+
+                <div class="composer">
+
+                    <textarea
+                        id="messageInput"
+                        rows="1"
+                        placeholder="Tell me what you want to buy..."
+                    ></textarea>
+
+
+                    <button
+                        id="sendButton"
+                        class="send-button"
+                        type="button"
+                        aria-label="Send message"
+                    >
+
+                        <span>
+                            ↑
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <div class="composer-hint">
+
+                    <span>
+                        AI recommendations
+                    </span>
+
+                    <span>•</span>
+
+                    <span>
+                        Human approval
+                    </span>
+
+                    <span>•</span>
+
+                    <span>
+                        Secure payment
+                    </span>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =====================================
+             RIGHT PANEL
+        ====================================== -->
+
+        <aside class="inspector">
+
+            <div class="inspector-header">
+
+                <div>
+
+                    <div class="eyebrow">
+                        TRANSACTION CONTROL
+                    </div>
+
+                    <h3>
+                        Purchase Security
+                    </h3>
+
+                </div>
+
+                <div class="shield">
+                    ✓
+                </div>
+
+            </div>
+
+
+            <!-- Current state -->
+
+            <div class="control-section">
+
+                <div class="section-label">
+                    CURRENT STATE
+                </div>
+
+                <div
+                    class="state-card"
+                    id="stateCard"
+                >
+
+                    <div
+                        class="state-indicator"
+                        id="stateIndicator"
+                    ></div>
+
+                    <div>
+
+                        <strong id="stateTitle">
+                            Waiting for request
+                        </strong>
+
+                        <span id="stateDescription">
+                            Your shopping session hasn't started yet.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Transaction pipeline -->
+
+            <div class="control-section">
+
+                <div class="section-label">
+                    TRANSACTION PIPELINE
+                </div>
+
+
+                <div class="pipeline">
+
+                    <div
+                        class="pipeline-step"
+                        id="pipelineIntent"
+                    >
+
+                        <div class="pipeline-number">
+                            01
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Intent
+                            </strong>
+
+                            <span>
+                                Understand request
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pipeline-line"></div>
+
+
+                    <div
+                        class="pipeline-step"
+                        id="pipelinePolicy"
+                    >
+
+                        <div class="pipeline-number">
+                            02
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Policy
+                            </strong>
+
+                            <span>
+                                Safety verification
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pipeline-line"></div>
+
+
+                    <div
+                        class="pipeline-step"
+                        id="pipelineApproval"
+                    >
+
+                        <div class="pipeline-number">
+                            03
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Approval
+                            </strong>
+
+                            <span>
+                                Your authorization
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pipeline-line"></div>
+
+
+                    <div
+                        class="pipeline-step"
+                        id="pipelinePayment"
+                    >
+
+                        <div class="pipeline-number">
+                            04
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Payment
+                            </strong>
+
+                            <span>
+                                Razorpay
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Trust -->
+
+            <div class="trust-box">
+
+                <div class="trust-title">
+                    🔐 You stay in control
+                </div>
+
+                <p>
+                    The AI can prepare a purchase,
+                    but it cannot authorize payment
+                    without your explicit approval.
+                </p>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+
+    <!-- =========================================
+         PRODUCT APPROVAL MODAL
+    ========================================== -->
+
+    <div
+        class="modal-overlay hidden"
+        id="approvalModal"
+    >
+
+        <div class="approval-modal">
+
+            <button
+                class="modal-close"
+                id="closeModal"
+                type="button"
+            >
+                ×
+            </button>
+
+
+            <div class="modal-icon">
+                ✓
+            </div>
+
+
+            <div class="eyebrow">
+                PURCHASE REVIEW
+            </div>
+
+
+            <h2>
+                Ready to purchase?
+            </h2>
+
+
+            <p class="modal-description">
+                Review the transaction before authorizing
+                the payment.
+            </p>
+
+
+            <div class="purchase-card">
+
+                <div class="purchase-product">
+
+                    <div class="product-icon">
+                        🖱️
+                    </div>
+
+                    <div>
+
+                        <strong id="modalProductName">
+                            Product
+                        </strong>
+
+                        <span id="modalProductReason">
+                            Recommended for you
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="purchase-price">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong id="modalProductPrice">
+                        ₹0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="approval-checks">
+
+                <div>
+                    <span>✓</span>
+                    Policy approved
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    Within your budget
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    User approval required
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    class="button secondary"
+                    id="rejectButton"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="button primary"
+                    id="approveButton"
+                    type="button"
+                >
+                    Approve & Continue
+                    <span>→</span>
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         RAZORPAY CHECKOUT
+    ========================================== -->
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+        window.RAZORPAY_KEY_ID = "rzp_test_TUi28O8V9GShpw";
+    </script>
+
+
+    <!-- =========================================
+         APPLICATION JAVASCRIPT
+    ========================================== -->
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
