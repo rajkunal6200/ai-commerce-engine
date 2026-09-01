@@ -17,3 +17,6 @@ webhook_events.json
 
 # macOS
 .DS_Store
+
+# Testing
+.pytest_cache/
