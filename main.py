@@ -1617,6 +1617,34 @@ def verify_payment_endpoint(
             detail="Razorpay order mismatch"
         )
 
+    # --------------------------------------------------------
+    # Payment verification idempotency
+    # --------------------------------------------------------
+
+    if stored_intent.get("status") == "payment_verified":
+
+        stored_payment_id = payment.get("payment_id")
+
+        if stored_payment_id != request.razorpay_payment_id:
+
+            raise HTTPException(
+                status_code=400,
+                detail="Payment ID does not match the verified payment"
+            )
+
+        safe_payment = {
+            key: value
+            for key, value in payment.items()
+            if not key.startswith("_")
+        }
+
+        return {
+            "intent_id": intent_id,
+            "status": "payment_verified",
+            "payment": safe_payment,
+            "idempotent": True
+        }
+
     try:
 
         verification = verify_payment(
