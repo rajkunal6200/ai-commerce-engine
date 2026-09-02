@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import json
 
 import main
@@ -79,3 +81,33 @@ def test_audit_logs_persist_and_reload(tmp_path, monkeypatch):
     assert isinstance(reloaded[0], AuditEvent)
     assert reloaded[0].intent_id == "test-intent-001"
     assert reloaded[0].event == "intent_created"
+
+
+def test_atomic_write_failure_preserves_existing_file(tmp_path, monkeypatch):
+    target = tmp_path / "intents.json"
+
+    original_data = {
+        "existing-intent": {
+            "status": "intent_created"
+        }
+    }
+
+    target.write_text(json.dumps(original_data, indent=2))
+
+    def failing_write_text(self, *args, **kwargs):
+        raise OSError("simulated disk write failure")
+
+    monkeypatch.setattr(Path, "write_text", failing_write_text)
+
+    try:
+        main.atomic_write_json(
+            target,
+            {"new-intent": {"status": "changed"}}
+        )
+    except OSError:
+        pass
+
+    saved_data = json.loads(target.read_text())
+
+    assert saved_data == original_data
+    assert not (tmp_path / "intents.json.tmp").exists()

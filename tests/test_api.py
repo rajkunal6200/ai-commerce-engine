@@ -627,6 +627,31 @@ def test_reject_intent():
     assert main.intents[intent_id]["status"] == "rejected"
 
 
+def test_approval_rejected_after_execution_completed():
+    intent_id = create_test_intent()
+
+    main.intents[intent_id]["status"] = "execution_completed"
+    main.intents[intent_id]["approved"] = True
+
+    response = client.post(
+        "/approval",
+        json={
+            "intent_id": intent_id,
+            "approved": False
+        }
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == (
+        "Intent has already been executed"
+    )
+
+    assert main.intents[intent_id]["status"] == (
+        "execution_completed"
+    )
+    assert main.intents[intent_id]["approved"] is True
+
+
 def test_approval_unknown_intent_returns_404():
     response = client.post(
         "/approval",
@@ -643,6 +668,39 @@ def test_approval_unknown_intent_returns_404():
 # ============================================================
 # EXECUTION GATES
 # ============================================================
+
+
+def test_execute_blocks_intent_rejected_by_policy():
+    intent_id = create_test_intent()
+
+    main.intents[intent_id]["approved"] = True
+    main.intents[intent_id]["policy"] = {
+        "allowed": False,
+        "reason": "Policy rejected this intent."
+    }
+
+    response = client.post(
+        f"/execute/{intent_id}"
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == (
+        "Intent is not allowed by policy"
+    )
+
+    assert main.intents[intent_id]["status"] == "blocked"
+
+    events = [
+        event
+        for event in main.audit_logs
+        if event.intent_id == intent_id
+    ]
+
+    assert events[-1].event == "execution_blocked"
+    assert events[-1].status == "blocked"
+    assert events[-1].reason == (
+        "Intent is not allowed by policy"
+    )
 
 
 def test_execute_requires_approval():
@@ -726,6 +784,69 @@ def test_execute_creates_payment_order_after_approval(
     assert stored["status"] == "payment_pending"
     assert stored["payment"]["order_id"] == "order_test_api_001"
     assert stored["execution_count"] == 1
+
+
+def test_execute_rejects_execution_already_in_progress():
+    intent_id = create_test_intent()
+
+    main.intents[intent_id]["approved"] = True
+    main.intents[intent_id]["status"] = "execution_in_progress"
+
+    response = client.post(
+        f"/execute/{intent_id}"
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == (
+        "Intent execution is already in progress"
+    )
+
+    assert main.intents[intent_id]["status"] == (
+        "execution_in_progress"
+    )
+    assert main.intents[intent_id]["execution_count"] == 0
+
+
+def test_execute_handles_payment_creation_failure(monkeypatch):
+    intent_id = create_test_intent()
+
+    main.intents[intent_id]["approved"] = True
+
+    def failing_create_payment(intent, intent_id=None):
+        raise RuntimeError("simulated Razorpay failure")
+
+    monkeypatch.setattr(
+        main,
+        "create_payment",
+        failing_create_payment
+    )
+
+    response = client.post(
+        f"/execute/{intent_id}"
+    )
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == (
+        "Payment creation failed"
+    )
+
+    assert main.intents[intent_id]["status"] == (
+        "payment_failed"
+    )
+
+    assert main.intents[intent_id]["execution_count"] == 1
+
+    events = [
+        event
+        for event in main.audit_logs
+        if event.intent_id == intent_id
+    ]
+
+    assert events[-1].event == "payment_failed"
+    assert events[-1].status == "failed"
+    assert events[-1].reason == (
+        "Razorpay order creation failed"
+    )
 
 
 def test_execute_reuses_existing_pending_payment():

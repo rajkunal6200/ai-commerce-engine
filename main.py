@@ -38,6 +38,7 @@ import uuid
 import re
 import json
 import time
+import os
 from pathlib import Path
 
 
@@ -154,28 +155,36 @@ def load_audit_logs():
         return []
 
 
-def save_intents():
-    INTENTS_FILE.write_text(
+def atomic_write_json(path, data):
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+
+    temp_path.write_text(
         json.dumps(
-            intents,
+            data,
             indent=2,
             default=str
         )
     )
 
+    os.replace(temp_path, path)
+
+
+def save_intents():
+    atomic_write_json(
+        INTENTS_FILE,
+        intents
+    )
+
 
 def save_audit_logs():
-    AUDIT_LOGS_FILE.write_text(
-        json.dumps(
-            [
-                event.model_dump()
-                if isinstance(event, AuditEvent)
-                else event
-                for event in audit_logs
-            ],
-            indent=2,
-            default=str
-        )
+    atomic_write_json(
+        AUDIT_LOGS_FILE,
+        [
+            event.model_dump()
+            if isinstance(event, AuditEvent)
+            else event
+            for event in audit_logs
+        ]
     )
 
 
@@ -1472,6 +1481,8 @@ def execute_intent(
     # Policy gate
     if not stored_intent["policy"]["allowed"]:
 
+        stored_intent["status"] = "blocked"
+
         audit_logs.append(
             AuditEvent(
                 intent_id=intent_id,
@@ -1481,7 +1492,8 @@ def execute_intent(
             )
         )
 
-        stored_intent["status"] = "blocked"
+        save_intents()
+        save_audit_logs()
 
         raise HTTPException(
             status_code=403,
