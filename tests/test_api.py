@@ -970,6 +970,68 @@ def test_get_audit_trail():
     ]
 
 
+
+def test_payment_verification_records_success_audit_events(
+    monkeypatch
+):
+    intent_id = create_test_intent()
+
+    main.intents[intent_id]["approved"] = True
+    main.intents[intent_id]["status"] = "payment_pending"
+    main.intents[intent_id]["payment"] = {
+        "status": "payment_pending",
+        "order_id": "order_verify_001",
+        "merchant": "Amazon",
+        "amount": 5000,
+        "currency": "INR",
+        "key_id": "rzp_test_fake"
+    }
+
+    fake_verification = {
+        "status": "payment_verified",
+        "captured": True,
+        "amount_rupees": 5000,
+        "currency": "INR"
+    }
+
+    monkeypatch.setattr(
+        main,
+        "verify_payment",
+        lambda *args, **kwargs: fake_verification
+    )
+
+    response = client.post(
+        "/payment/verify",
+        json={
+            "intent_id": intent_id,
+            "razorpay_payment_id": "pay_verify_001",
+            "razorpay_order_id": "order_verify_001",
+            "razorpay_signature": "fake_signature"
+        }
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent_id"] == intent_id
+    assert data["status"] == "payment_verified"
+    assert data["payment"]["order_id"] == "order_verify_001"
+    assert data["payment"]["payment_id"] == "pay_verify_001"
+    assert data["payment"]["captured"] is True
+
+    events = [
+        event.event
+        for event in main.audit_logs
+        if event.intent_id == intent_id
+    ]
+
+    assert events[-3:] == [
+        "payment_signature_verified",
+        "execution_completed",
+        "payment_captured"
+    ]
+
 def test_get_audit_unknown_intent_returns_404():
     response = client.get(
         "/audit/does-not-exist"
