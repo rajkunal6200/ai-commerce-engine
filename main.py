@@ -308,6 +308,46 @@ def get_catalog():
     }
 
 
+@app.get("/commerce-profile")
+def get_commerce_profile():
+    return {
+        "protocol": "ai-commerce-profile-v1",
+        "merchant": "AI Commerce Demo Store",
+        "description": "AI-native merchant catalog for bounded, auditable commerce.",
+        "currency": "INR",
+        "capabilities": {
+            "catalog_discovery": True,
+            "natural_language_shopping": True,
+            "recommendations": True,
+            "cross_sell": True,
+            "bounded_purchase_intent": True,
+            "user_approval_required": True,
+            "razorpay_payment": True,
+            "server_side_payment_verification": True,
+            "audit_trail": True
+        },
+        "purchase_rules": {
+            "approval_required": True,
+            "execution_is_bounded_by_intent": True,
+            "payment_is_server_verified": True
+        },
+        "products": [
+            {
+                "product_id": product.product_id,
+                "name": product.name,
+                "description": product.description,
+                "category": product.category,
+                "price": product.price,
+                "currency": product.currency,
+                "stock": product.stock,
+                "available": product.stock > 0,
+                "tags": product.tags
+            }
+            for product in catalog
+        ]
+    }
+
+
 # ============================================================
 # STEP 19A
 # BUYER UNDERSTANDING

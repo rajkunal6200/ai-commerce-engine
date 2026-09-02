@@ -1039,3 +1039,26 @@ def test_get_audit_unknown_intent_returns_404():
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Intent not found"
+
+def test_commerce_profile_exposes_real_catalog_and_rules():
+    response = client.get("/commerce-profile")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["protocol"] == "ai-commerce-profile-v1"
+    assert data["merchant"] == "AI Commerce Demo Store"
+    assert data["currency"] == "INR"
+    assert data["capabilities"]["user_approval_required"] is True
+    assert data["capabilities"]["server_side_payment_verification"] is True
+    assert len(data["products"]) == 3
+
+    products = {item["product_id"]: item for item in data["products"]}
+
+    assert products["LAP001"]["price"] == 50000
+    assert products["HP001"]["price"] == 5000
+    assert products["MS001"]["price"] == 1500
+    assert products["MS001"]["stock"] == 40
+    assert products["MS001"]["available"] is True
+
