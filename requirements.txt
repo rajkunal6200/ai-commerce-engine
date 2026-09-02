@@ -3,3 +3,4 @@ pydantic
 razorpay
 python-dotenv
 uvicorn
+httpx2
