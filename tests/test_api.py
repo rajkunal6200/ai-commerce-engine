@@ -68,7 +68,7 @@ def test_catalog_returns_products():
 
     data = response.json()
 
-    assert data["merchant"] == "Amazon"
+    assert data["merchant"] == "AI Commerce Demo Store"
     assert isinstance(data["products"], list)
     assert len(data["products"]) == 3
 

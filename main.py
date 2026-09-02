@@ -303,7 +303,7 @@ def root():
 @app.get("/catalog")
 def get_catalog():
     return {
-        "merchant": "Amazon",
+        "merchant": "AI Commerce Demo Store",
         "products": catalog
     }
 
@@ -857,7 +857,7 @@ def shopping_agent(
             )
 
     intent = IntentContract(
-        merchant="Amazon",
+        merchant="AI Commerce Demo Store",
         purpose=f"Buy {main_product.name}",
         max_amount=main_product.price,
         currency=main_product.currency,
@@ -1199,7 +1199,7 @@ def conversational_shop(
     # --------------------------------------------------------
 
     intent = IntentContract(
-        merchant="Amazon",
+        merchant="AI Commerce Demo Store",
         purpose=f"Buy {product.name}",
         max_amount=product.price,
         currency=product.currency,
