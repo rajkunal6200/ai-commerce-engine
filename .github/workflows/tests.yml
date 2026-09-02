@@ -27,4 +27,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tests
+        env:
+          RAZORPAY_KEY_ID: ci_test_key_id
+          RAZORPAY_KEY_SECRET: ci_test_key_secret
+          RAZORPAY_WEBHOOK_SECRET: ci_test_webhook_secret
         run: pytest -q
