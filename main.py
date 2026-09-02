@@ -167,7 +167,12 @@ def save_intents():
 def save_audit_logs():
     AUDIT_LOGS_FILE.write_text(
         json.dumps(
-            audit_logs,
+            [
+                event.model_dump()
+                if isinstance(event, AuditEvent)
+                else event
+                for event in audit_logs
+            ],
             indent=2,
             default=str
         )
