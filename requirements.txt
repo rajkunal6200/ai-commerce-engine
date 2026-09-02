@@ -4,3 +4,5 @@ razorpay
 python-dotenv
 uvicorn
 httpx2
+
+pytest
