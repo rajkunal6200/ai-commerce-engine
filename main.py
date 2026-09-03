@@ -2549,6 +2549,62 @@ def create_intent(
 
 
 # ============================================================
+# AUTONOMOUS COMMERCE LOOP
+# ============================================================
+
+@app.get("/commerce-loop/{intent_id}")
+def commerce_loop_status(intent_id: str):
+
+    if intent_id not in intents:
+        raise HTTPException(
+            status_code=404,
+            detail="Intent not found"
+        )
+
+    stored_intent = intents[intent_id]
+    policy = stored_intent.get("policy") or {}
+    contract = stored_intent.get("commerce_contract")
+
+    policy_allowed = bool(policy.get("allowed"))
+    approved = bool(stored_intent.get("approved"))
+
+    if stored_intent.get("status") == "payment_verified":
+        stage = "payment_verified"
+        next_action = "none"
+    elif stored_intent.get("status") == "payment_authorized":
+        stage = "payment_authorized"
+        next_action = "await_capture"
+    elif stored_intent.get("status") == "payment_pending":
+        stage = "payment_pending"
+        next_action = "complete_payment"
+    elif not policy_allowed:
+        stage = "blocked"
+        next_action = "none"
+    elif not approved:
+        stage = "awaiting_approval"
+        next_action = "approve"
+    else:
+        stage = "ready_for_execution"
+        next_action = "execute"
+
+    return {
+        "intent_id": intent_id,
+        "stage": stage,
+        "next_action": next_action,
+        "policy_allowed": policy_allowed,
+        "user_approved": approved,
+        "payment_status": stored_intent.get("status"),
+        "commerce_contract_present": contract is not None,
+        "autonomous_payment": False,
+        "message": (
+            "Commerce loop is ready for the next safe action. "
+            "Payment always requires the existing approval and "
+            "execution gates."
+        )
+    }
+
+
+# ============================================================
 # APPROVAL
 # ============================================================
 
