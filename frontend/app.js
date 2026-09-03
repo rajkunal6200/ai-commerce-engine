@@ -1543,6 +1543,12 @@ const dashboardDataStatus =
 const dashboardExplanation =
     document.getElementById("dashboardExplanation");
 
+const dashboardDecision =
+    document.getElementById("dashboardDecision");
+
+const dashboardDecisionType =
+    document.getElementById("dashboardDecisionType");
+
 
 function setDashboardMode(showDashboard) {
 
@@ -1759,6 +1765,59 @@ function renderDashboardOpportunities(
 }
 
 
+function renderDashboardDecision(revenue) {
+
+    const trace = revenue?.decision_trace;
+
+    if (!trace) {
+        dashboardDecision.innerHTML =
+            `<div class="dashboard-empty">
+                AI decision data unavailable.
+            </div>`;
+        return;
+    }
+
+    dashboardDecisionType.textContent =
+        trace.decision_type || "AI decision";
+
+    dashboardDecision.innerHTML = `
+        <div class="dashboard-decision-main">
+            <strong>${escapeHtml(
+                trace.decision || "Decision unavailable"
+            )}</strong>
+
+            <p>${escapeHtml(
+                trace.explanation || ""
+            )}</p>
+        </div>
+
+        <div class="dashboard-decision-factors">
+            ${
+                Array.isArray(trace.factors)
+                    ? trace.factors.map(
+                        factor => `
+                            <div class="dashboard-decision-factor">
+                                <strong>${escapeHtml(
+                                    factor.factor
+                                )}</strong>
+
+                                <span>${escapeHtml(
+                                    factor.value
+                                )}</span>
+
+                                <p>${escapeHtml(
+                                    factor.impact
+                                )}</p>
+                            </div>
+                        `
+                    ).join("")
+                    : ""
+            }
+        </div>
+    `;
+}
+
+
 function renderDashboardProfile(profile) {
 
     dashboardProfile.innerHTML = "";
@@ -1928,6 +1987,10 @@ async function loadMerchantDashboard() {
             await fetchDashboardData();
 
         renderDashboardMetrics(
+            data.revenue
+        );
+
+        renderDashboardDecision(
             data.revenue
         );
 
