@@ -502,30 +502,97 @@ function addAgentRecommendation(data) {
 // OPEN APPROVAL MODAL
 // ============================================================
 
-function openApprovalModal(product) {
+async function openApprovalModal(product) {
 
     if (!product) {
         return;
     }
 
-
     currentProduct = product;
 
+    let displayName = product.name;
+    let displayReason = product.reason;
+    let displayAmount = product.price;
+    let displayCurrency = product.currency;
+
+    // Fetch the server-authoritative Commerce Offer before approval.
+    if (currentIntentId) {
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/intent/${currentIntentId}`,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            const intentData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    intentData.detail ||
+                    "Could not load the validated offer."
+                );
+            }
+
+            const offer = intentData.offer;
+            const contractOffer =
+                intentData.commerce_contract?.offer;
+
+            if (offer) {
+                displayName =
+                    offer.primary_product?.name ||
+                    displayName;
+
+                displayAmount =
+                    offer.final_amount;
+
+                displayCurrency =
+                    offer.currency ||
+                    displayCurrency;
+
+                displayReason =
+                    offer.explanation ||
+                    displayReason;
+            } else if (contractOffer) {
+                displayName =
+                    contractOffer.product_name ||
+                    displayName;
+
+                displayAmount =
+                    contractOffer.final_amount;
+
+                displayCurrency =
+                    contractOffer.currency ||
+                    displayCurrency;
+            }
+        } catch (error) {
+            console.error(
+                "Validated offer loading failed:",
+                error
+            );
+
+            addMessage(
+                "agent",
+                `⚠️ ${error.message}`
+            );
+
+            return;
+        }
+    }
 
     modalProductName.textContent =
-        product.name;
-
+        displayName;
 
     modalProductReason.textContent =
-        product.reason;
-
+        displayReason;
 
     modalProductPrice.textContent =
         formatCurrency(
-            product.price,
-            product.currency
+            displayAmount,
+            displayCurrency
         );
-
 
     approvalModal.classList.remove(
         "hidden"
@@ -1419,10 +1486,522 @@ function formatAuditEvent(event) {
 
 
 // ============================================================
+// MERCHANT DASHBOARD
+// ============================================================
+
+const merchantButton =
+    document.getElementById("merchantButton");
+
+const merchantDashboard =
+    document.getElementById("merchantDashboard");
+
+const ordersView =
+    document.getElementById("ordersView");
+
+const ordersList =
+    document.getElementById("ordersList");
+
+const ordersRefreshButton =
+    document.getElementById("ordersRefreshButton");
+
+const chatContainer =
+    document.getElementById("chatContainer");
+
+const composerWrapper =
+    document.querySelector(".composer-wrapper");
+
+const dashboardRefreshButton =
+    document.getElementById("dashboardRefreshButton");
+
+const dashboardRevenue =
+    document.getElementById("dashboardRevenue");
+
+const dashboardOrders =
+    document.getElementById("dashboardOrders");
+
+const dashboardAov =
+    document.getElementById("dashboardAov");
+
+const dashboardPaymentIssues =
+    document.getElementById("dashboardPaymentIssues");
+
+const dashboardOpportunities =
+    document.getElementById("dashboardOpportunities");
+
+const dashboardProfile =
+    document.getElementById("dashboardProfile");
+
+const dashboardCatalog =
+    document.getElementById("dashboardCatalog");
+
+const dashboardCatalogCount =
+    document.getElementById("dashboardCatalogCount");
+
+const dashboardDataStatus =
+    document.getElementById("dashboardDataStatus");
+
+const dashboardExplanation =
+    document.getElementById("dashboardExplanation");
+
+
+function setDashboardMode(showDashboard) {
+
+    merchantDashboard.classList.toggle(
+        "hidden",
+        !showDashboard
+    );
+
+    if (ordersView) {
+        ordersView.classList.add("hidden");
+    }
+
+    chatContainer.classList.toggle(
+        "hidden",
+        showDashboard
+    );
+
+    composerWrapper.classList.toggle(
+        "hidden",
+        showDashboard
+    );
+
+    document
+        .querySelector(".inspector")
+        ?.classList.toggle(
+            "hidden",
+            showDashboard
+        );
+
+    newChatButton.classList.toggle(
+        "active",
+        !showDashboard
+    );
+
+    ordersButton.classList.toggle(
+        "active",
+        false
+    );
+
+    merchantButton.classList.toggle(
+        "active",
+        showDashboard
+    );
+
+    const heading =
+        document.querySelector(".topbar h1");
+
+    if (heading) {
+
+        heading.innerHTML =
+            showDashboard
+                ? 'Merchant <span>control plane.</span>'
+                : 'Your intelligent <span>shopping agent.</span>';
+    }
+
+    const eyebrow =
+        document.querySelector(".topbar .eyebrow");
+
+    if (eyebrow) {
+
+        eyebrow.textContent =
+            showDashboard
+                ? "MERCHANT CONTROL"
+                : "AI COMMERCE ENGINE";
+    }
+
+    if (showDashboard) {
+        loadMerchantDashboard();
+    }
+}
+
+
+async function fetchDashboardData() {
+
+    const responses =
+        await Promise.all([
+            fetch(
+                `${API_BASE_URL}/revenue-agent`,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            ),
+            fetch(
+                `${API_BASE_URL}/commerce-profile`,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            ),
+            fetch(
+                `${API_BASE_URL}/catalog`,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            )
+        ]);
+
+    const data = [];
+
+    for (const response of responses) {
+
+        const payload =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                payload.detail ||
+                "Dashboard data request failed."
+            );
+        }
+
+        data.push(payload);
+    }
+
+    return {
+        revenue: data[0],
+        profile: data[1],
+        catalog: data[2]
+    };
+}
+
+
+function renderDashboardMetrics(revenue) {
+
+    dashboardRevenue.textContent =
+        formatCurrency(
+            revenue.total_revenue,
+            "INR"
+        );
+
+    dashboardOrders.textContent =
+        String(
+            revenue.completed_orders
+        );
+
+    dashboardAov.textContent =
+        formatCurrency(
+            revenue.average_order_value,
+            "INR"
+        );
+
+    dashboardPaymentIssues.textContent =
+        String(
+            revenue.pending_payments +
+            revenue.failed_payments
+        );
+}
+
+
+function renderDashboardOpportunities(
+    opportunities
+) {
+
+    dashboardOpportunities.innerHTML = "";
+
+    if (
+        !Array.isArray(opportunities) ||
+        opportunities.length === 0
+    ) {
+
+        dashboardOpportunities.innerHTML =
+            `<div class="dashboard-empty">
+                No revenue opportunities detected
+                from completed purchases yet.
+            </div>`;
+
+        return;
+    }
+
+    opportunities.forEach(
+        opportunity => {
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "dashboard-opportunity";
+
+            card.innerHTML = `
+                <div class="dashboard-opportunity-top">
+                    <strong>${escapeHtml(
+                        opportunity.product_name
+                    )}</strong>
+
+                    <span class="dashboard-opportunity-badge">
+                        ${escapeHtml(
+                            opportunity.opportunity
+                        )}
+                    </span>
+                </div>
+
+                <p>${escapeHtml(
+                    opportunity.reason
+                )}</p>
+
+                <div class="dashboard-opportunity-action">
+                    ${escapeHtml(
+                        opportunity.potential_action
+                    )}
+                </div>
+            `;
+
+            dashboardOpportunities.appendChild(
+                card
+            );
+        }
+    );
+}
+
+
+function renderDashboardProfile(profile) {
+
+    dashboardProfile.innerHTML = "";
+
+    if (!profile || typeof profile !== "object") {
+
+        dashboardProfile.innerHTML =
+            `<div class="dashboard-empty">
+                Merchant profile unavailable.
+            </div>`;
+
+        return;
+    }
+
+    const entries = [
+        ["Merchant", profile.merchant],
+        ["Currency", profile.currency],
+        ["Checkout", profile.checkout],
+        ["Approval", profile.user_approval_required],
+        ["Catalog", profile.catalog_description]
+    ];
+
+    entries.forEach(
+        ([label, value]) => {
+
+            if (
+                value === undefined ||
+                value === null
+            ) {
+                return;
+            }
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "dashboard-profile-row";
+
+            const labelElement =
+                document.createElement("span");
+
+            labelElement.className =
+                "dashboard-profile-label";
+
+            labelElement.textContent =
+                label;
+
+            const valueElement =
+                document.createElement("span");
+
+            valueElement.className =
+                "dashboard-profile-value";
+
+            valueElement.textContent =
+                typeof value === "boolean"
+                    ? value
+                        ? "Required"
+                        : "Not required"
+                    : String(value);
+
+            row.appendChild(labelElement);
+            row.appendChild(valueElement);
+
+            dashboardProfile.appendChild(row);
+        }
+    );
+}
+
+
+function renderDashboardCatalog(catalog) {
+
+    dashboardCatalog.innerHTML = "";
+
+    const products =
+        Array.isArray(catalog)
+            ? catalog
+            : Array.isArray(catalog?.products)
+                ? catalog.products
+                : [];
+
+    dashboardCatalogCount.textContent =
+        `${products.length} ${
+            products.length === 1
+                ? "product"
+                : "products"
+        }`;
+
+    if (!products.length) {
+
+        dashboardCatalog.innerHTML =
+            `<div class="dashboard-empty">
+                No catalog products available.
+            </div>`;
+
+        return;
+    }
+
+    products.forEach(
+        product => {
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "dashboard-product";
+
+            const tags =
+                Array.isArray(product.tags)
+                    ? product.tags
+                    : [];
+
+            const stockText =
+                product.stock > 0
+                    ? `${product.stock} in stock`
+                    : "Out of stock";
+
+            card.innerHTML = `
+                <div class="dashboard-product-icon">
+                    ${getProductIcon(
+                        product.name
+                    )}
+                </div>
+
+                <strong>
+                    ${escapeHtml(
+                        product.name
+                    )}
+                </strong>
+
+                <span class="dashboard-product-price">
+                    ${formatCurrency(
+                        product.price,
+                        product.currency
+                    )}
+                </span>
+
+                <span class="dashboard-product-stock">
+                    ${escapeHtml(stockText)}
+                </span>
+
+                <div class="dashboard-product-tags">
+                    ${tags
+                        .map(
+                            tag =>
+                                `<span class="dashboard-product-tag">
+                                    ${escapeHtml(tag)}
+                                </span>`
+                        )
+                        .join("")}
+                </div>
+            `;
+
+            dashboardCatalog.appendChild(card);
+        }
+    );
+}
+
+
+async function loadMerchantDashboard() {
+
+    dashboardDataStatus.textContent =
+        "Refreshing";
+
+    try {
+
+        const data =
+            await fetchDashboardData();
+
+        renderDashboardMetrics(
+            data.revenue
+        );
+
+        renderDashboardOpportunities(
+            data.revenue.opportunities
+        );
+
+        renderDashboardProfile(
+            data.profile
+        );
+
+        renderDashboardCatalog(
+            data.catalog
+        );
+
+        dashboardExplanation.textContent =
+            data.revenue.explanation;
+
+        dashboardDataStatus.textContent =
+            "Live data";
+
+    } catch (error) {
+
+        console.error(
+            "Merchant dashboard loading failed:",
+            error
+        );
+
+        dashboardDataStatus.textContent =
+            "Unavailable";
+
+        dashboardOpportunities.innerHTML =
+            `<div class="dashboard-empty">
+                Could not load live merchant data.
+                ${escapeHtml(error.message)}
+            </div>`;
+
+        dashboardExplanation.textContent =
+            "The dashboard could not retrieve live backend data. No revenue values were estimated.";
+    }
+}
+
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+merchantButton.addEventListener(
+    "click",
+    () => {
+        setDashboardMode(true);
+    }
+);
+
+dashboardRefreshButton.addEventListener(
+    "click",
+    loadMerchantDashboard
+);
+
+
+// ============================================================
 // NEW CHAT
 // ============================================================
 
 function startNewChat() {
+
+    setDashboardMode(false);
 
     sessionId = null;
 
@@ -1778,38 +2357,211 @@ newChatButton.addEventListener(
 // ORDERS
 // ============================================================
 
+function formatOrderStatus(status) {
+
+    const labels = {
+        payment_verified: "Payment verified",
+        payment_pending: "Payment pending",
+        payment_failed: "Payment failed"
+    };
+
+    return labels[status] || status || "Unknown";
+}
+
+
+function renderOrders(orders) {
+
+    if (!ordersList) {
+        return;
+    }
+
+    ordersList.innerHTML = "";
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+
+        ordersList.innerHTML = `
+            <div class="dashboard-empty">
+                No orders found.
+            </div>
+        `;
+
+        return;
+    }
+
+    orders.forEach(order => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "dashboard-opportunity";
+
+        const amount =
+            order.amount !== null &&
+            order.amount !== undefined
+                ? formatCurrency(
+                    order.amount,
+                    order.currency || "INR"
+                )
+                : "—";
+
+        const status =
+            formatOrderStatus(
+                order.status
+            );
+
+        card.innerHTML = `
+            <div class="dashboard-opportunity-top">
+                <strong>
+                    ${escapeHtml(
+                        order.order_id || "Order"
+                    )}
+                </strong>
+
+                <span class="dashboard-opportunity-badge">
+                    ${escapeHtml(status)}
+                </span>
+            </div>
+
+            <p>
+                ${escapeHtml(
+                    order.merchant ||
+                    "AI Commerce Demo Store"
+                )}
+            </p>
+
+            <div class="dashboard-opportunity-action">
+                Amount: ${escapeHtml(amount)}
+                ${
+                    order.payment_id
+                        ? ` • Payment: ${escapeHtml(
+                            order.payment_id
+                        )}`
+                        : ""
+                }
+            </div>
+        `;
+
+        ordersList.appendChild(card);
+    });
+}
+
+
+async function loadOrders() {
+
+    if (!ordersList) {
+        return;
+    }
+
+    ordersList.innerHTML = `
+        <div class="dashboard-empty">
+            Loading orders...
+        </div>
+    `;
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE_URL}/orders`,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Unable to load orders."
+            );
+        }
+
+        renderOrders(data.orders);
+
+    } catch (error) {
+
+        ordersList.innerHTML = `
+            <div class="dashboard-empty">
+                Unable to load orders.
+                <br>
+                ${escapeHtml(
+                    error.message ||
+                    "Unknown error."
+                )}
+            </div>
+        `;
+    }
+}
+
+
 ordersButton.addEventListener(
     "click",
     () => {
 
-        if (!lastPayment) {
-
-            addMessage(
-                "agent",
-                "No order has been created in this session yet."
-            );
-
-            return;
-        }
-
-        const orderId =
-            lastPayment.order_id || "—";
-
-        const amount =
-            formatCurrency(
-                lastPayment.amount,
-                lastPayment.currency
-            );
-
-        addMessage(
-            "agent",
-            `Latest order: ${orderId} • ${amount} • ${lastPayment.status || "created"}`
+        merchantDashboard.classList.add(
+            "hidden"
         );
 
-        if (lastAuditTrail.length) {
-            renderAuditTrail(lastAuditTrail);
+        chatContainer.classList.add(
+            "hidden"
+        );
+
+        composerWrapper.classList.add(
+            "hidden"
+        );
+
+        document
+            .querySelector(".inspector")
+            ?.classList.add("hidden");
+
+        ordersView?.classList.remove(
+            "hidden"
+        );
+
+        newChatButton.classList.remove(
+            "active"
+        );
+
+        merchantButton.classList.remove(
+            "active"
+        );
+
+        ordersButton.classList.add(
+            "active"
+        );
+
+        const heading =
+            document.querySelector(".topbar h1");
+
+        if (heading) {
+
+            heading.innerHTML =
+                'Your <span>orders.</span>';
         }
+
+        const eyebrow =
+            document.querySelector(".topbar .eyebrow");
+
+        if (eyebrow) {
+
+            eyebrow.textContent =
+                "ORDER HISTORY";
+        }
+
+        loadOrders();
     }
+);
+
+
+ordersRefreshButton?.addEventListener(
+    "click",
+    loadOrders
 );
 
 

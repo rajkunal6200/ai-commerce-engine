@@ -391,6 +391,62 @@ def test_order_paid_webhook_confirms_payment():
     assert payment_state["webhook_confirmed"] is True
     assert payment_state["order_paid_webhook_confirmed"] is True
 
+
+def test_order_paid_webhook_without_stored_payment_id_confirms_payment():
+    intent_id = "test_order_paid_no_payment_id_001"
+    order_id = "order_order_paid_no_payment_id_001"
+
+    main.intents[intent_id] = {
+        "status": "payment_pending",
+        "payment": {
+            "order_id": order_id,
+            "status": "payment_pending",
+            "captured": False,
+        },
+    }
+
+    payload = {
+        "event": "order.paid",
+        "created_at": int(time.time()),
+        "payload": {
+            "order": {
+                "entity": {
+                    "entity": "order",
+                    "id": order_id,
+                }
+            }
+        },
+    }
+
+    raw_body = json.dumps(
+        payload,
+        separators=(",", ":"),
+    ).encode()
+
+    signature = make_webhook_signature(raw_body)
+
+    response = client.post(
+        "/webhooks/razorpay",
+        content=raw_body,
+        headers={
+            "X-Razorpay-Signature": signature,
+            "x-razorpay-event-id": "evt_order_paid_no_payment_id_001",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "received"
+
+    stored_intent = main.intents[intent_id]
+    assert stored_intent["status"] == "payment_verified"
+
+    payment_state = stored_intent["payment"]
+    assert payment_state["status"] == "payment_verified"
+    assert payment_state["captured"] is True
+    assert payment_state["webhook_confirmed"] is True
+    assert payment_state["order_paid_webhook_confirmed"] is True
+
+
 def test_duplicate_order_paid_with_different_event_id_is_ignored():
     intent_id = "test_duplicate_order_paid_001"
     order_id = "order_duplicate_order_paid_001"

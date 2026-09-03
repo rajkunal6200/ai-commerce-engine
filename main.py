@@ -6,7 +6,15 @@ from typing import Optional
 from models.intent import IntentContract
 from models.approval import ApprovalRequest
 from models.audit import AuditEvent
+from models.buyer_intent import BuyerIntent, BuyerIntentRequest, BuyerIntentResponse
 from models.catalog import Product
+from models.commerce_contract import CommerceContract, BuyerConstraints, MerchantRules, CommerceOffer
+from models.offer import OfferRequest, OfferItem, OfferProposal
+from models.revenue import (
+    RevenueMetric,
+    RevenueOpportunity,
+    RevenueAgentResponse
+)
 
 from models.recommendation import (
     RecommendationRequest,
@@ -306,6 +314,171 @@ def get_catalog():
         "merchant": "AI Commerce Demo Store",
         "products": catalog
     }
+
+
+@app.post("/buyer-intent", response_model=BuyerIntentResponse)
+def create_buyer_intent(request: BuyerIntentRequest):
+    query = request.query.lower().strip()
+    extracted_budget = extract_budget(request.query)
+
+    category = None
+    if "laptop" in query or "computer" in query:
+        category = "Laptop"
+    elif "headphone" in query:
+        category = "Headphones"
+    elif "mouse" in query:
+        category = "Mouse"
+
+    purpose = None
+    if "coding" in query or "developer" in query or "development" in query:
+        purpose = "development"
+    elif "work" in query or "productivity" in query:
+        purpose = "productivity"
+    elif "gaming" in query:
+        purpose = "gaming"
+
+    tag_map = {
+        "wireless": "wireless",
+        "productivity": "productivity",
+        "audio": "audio",
+        "ergonomic": "ergonomic",
+        "developer": "developer",
+        "accessory": "accessory",
+    }
+
+    requested_tags = [
+        tag
+        for keyword, tag in tag_map.items()
+        if keyword in query
+    ]
+
+    products = []
+
+    for product in catalog:
+        if product.stock <= 0:
+            continue
+
+        if extracted_budget is not None and product.price > extracted_budget:
+            continue
+
+        if category and product.category != category:
+            continue
+
+        score = 0
+
+        if purpose:
+            if purpose == "development" and (
+                "developer" in product.tags or
+                "work" in product.tags
+            ):
+                score += 3
+            elif purpose == "productivity" and "productivity" in product.tags:
+                score += 3
+
+        score += sum(
+            2 for tag in requested_tags
+            if tag in product.tags
+        )
+
+        products.append((score, product))
+
+    products.sort(key=lambda item: (-item[0], item[1].price))
+
+    matched_ids = [
+        product.product_id
+        for _, product in products
+    ]
+
+    intent = BuyerIntent(
+        raw_query=request.query,
+        purpose=purpose,
+        category=category,
+        max_budget=extracted_budget,
+        required_tags=requested_tags,
+        preferred_tags=[],
+        exclude_tags=[]
+    )
+
+    if matched_ids:
+        explanation = (
+            f"Matched {len(matched_ids)} available product(s) "
+            "using budget, category, purpose, and requested features."
+        )
+    else:
+        explanation = (
+            "No available catalog product satisfies the "
+            "requested budget and constraints."
+        )
+
+    return BuyerIntentResponse(
+        intent=intent,
+        matched_products=matched_ids,
+        explanation=explanation
+    )
+
+
+@app.post("/commerce-contract", response_model=CommerceContract)
+def create_commerce_contract(request: BuyerIntentRequest):
+    query = request.query.strip()
+
+    buyer_response = create_buyer_intent(request)
+    buyer_intent = buyer_response.intent
+
+    if not buyer_response.matched_products:
+        raise HTTPException(
+            status_code=404,
+            detail="No product satisfies the buyer constraints."
+        )
+
+    selected_product_id = buyer_response.matched_products[0]
+
+    product = next(
+        (
+            item
+            for item in catalog
+            if item.product_id == selected_product_id
+        ),
+        None
+    )
+
+    if product is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Matched product is no longer available."
+        )
+
+    buyer = BuyerConstraints(
+        query=query,
+        category=buyer_intent.category,
+        max_budget=buyer_intent.max_budget,
+        min_budget=buyer_intent.min_budget,
+        required_tags=buyer_intent.required_tags,
+        preferred_tags=buyer_intent.preferred_tags,
+        exclude_tags=buyer_intent.exclude_tags
+    )
+
+    merchant = MerchantRules(
+        currency=product.currency,
+        user_approval_required=True,
+        max_discount_percent=0
+    )
+
+    offer = CommerceOffer(
+        product_id=product.product_id,
+        product_name=product.name,
+        base_amount=product.price,
+        discount_amount=0,
+        final_amount=product.price,
+        currency=product.currency
+    )
+
+    return CommerceContract(
+        buyer=buyer,
+        merchant=merchant,
+        offer=offer,
+        policy_approved=False,
+        user_authorized=False
+    )
 
 
 @app.get("/commerce-profile")
@@ -793,6 +966,618 @@ def cross_sell_products(
 
 
 # ============================================================
+# OFFER ENGINE
+# ============================================================
+
+@app.post(
+    "/offer",
+    response_model=OfferProposal
+)
+def create_offer(
+    request: OfferRequest
+):
+
+    # --------------------------------------------------------
+    # 1. Find primary product
+    # --------------------------------------------------------
+
+    primary_product = next(
+        (
+            product
+            for product in catalog
+            if product.product_id == request.product_id
+        ),
+        None
+    )
+
+    if primary_product is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
+
+    if primary_product.stock <= 0:
+
+        raise HTTPException(
+            status_code=409,
+            detail="Primary product is out of stock"
+        )
+
+    # --------------------------------------------------------
+    # 2. Find complementary products
+    # --------------------------------------------------------
+
+    complementary_products = []
+
+    if (
+        request.max_budget is not None
+        and primary_product.price > request.max_budget
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Primary product exceeds the buyer budget"
+        )
+
+    current_total = primary_product.price
+
+    for product in catalog:
+
+        if len(complementary_products) >= request.max_items:
+            break
+
+        if product.product_id == primary_product.product_id:
+            continue
+
+        if product.stock <= 0:
+            continue
+
+        compatible = False
+
+        if primary_product.category == "Mouse":
+
+            compatible = product.category in [
+                "Headphones",
+                "Laptop"
+            ]
+
+        elif primary_product.category == "Laptop":
+
+            compatible = product.category in [
+                "Mouse",
+                "Headphones"
+            ]
+
+        elif primary_product.category == "Headphones":
+
+            compatible = product.category in [
+                "Mouse",
+                "Laptop"
+            ]
+
+        if not compatible:
+            continue
+
+        if (
+            request.max_budget is not None
+            and current_total + product.price > request.max_budget
+        ):
+            continue
+
+        complementary_products.append(
+            OfferItem(
+                product_id=product.product_id,
+                name=product.name,
+                price=product.price,
+                currency=product.currency,
+                reason=(
+                    f"Useful complementary product for "
+                    f"{primary_product.name}."
+                )
+            )
+        )
+
+        current_total += product.price
+
+    # --------------------------------------------------------
+    # 3. Bundle size is enforced during selection
+    # --------------------------------------------------------
+
+    primary_item = OfferItem(
+        product_id=primary_product.product_id,
+        name=primary_product.name,
+        price=primary_product.price,
+        currency=primary_product.currency,
+        reason="Primary product selected from the merchant catalog."
+    )
+
+    # --------------------------------------------------------
+    # 4. Calculate real bundle amount
+    # --------------------------------------------------------
+
+    subtotal = primary_product.price + sum(
+        item.price
+        for item in complementary_products
+    )
+
+    # No discount is invented.
+    # A discount can only be introduced later through
+    # an explicit merchant-configured rule.
+
+    discount_amount = 0
+
+    final_amount = subtotal
+
+    discount_percent = 0.0
+
+    # --------------------------------------------------------
+    # 5. Explain the bounded offer
+    # --------------------------------------------------------
+
+    if complementary_products:
+
+        explanation = (
+            f"Bundle proposal combines {primary_product.name} "
+            f"with {len(complementary_products)} complementary "
+            "in-stock product(s). Pricing uses the merchant "
+            "catalog and no discount is applied."
+        )
+
+    else:
+
+        explanation = (
+            f"No complementary in-stock products were available "
+            f"for {primary_product.name}. The offer contains only "
+            "the primary product."
+        )
+
+    bounded_by = [
+        "merchant_catalog_prices",
+        "stock_availability",
+        "explicit_product_compatibility",
+        "no_unconfigured_discount"
+    ]
+
+    if request.max_budget is not None:
+        bounded_by.append("buyer_max_budget")
+
+    return OfferProposal(
+        primary_product=primary_item,
+        complementary_products=complementary_products,
+        subtotal=subtotal,
+        discount_amount=discount_amount,
+        final_amount=final_amount,
+        currency=primary_product.currency,
+        discount_percent=discount_percent,
+        explanation=explanation,
+        bounded_by=bounded_by
+    )
+
+
+
+def _create_offer_from_contract(
+    contract: CommerceContract
+) -> OfferProposal:
+
+    # 1. Validate merchant currency
+    if contract.merchant.currency != contract.offer.currency:
+        raise HTTPException(
+            status_code=422,
+            detail="Contract merchant currency does not match offer currency."
+        )
+
+    # 2. Find contract primary product
+    primary_product = next(
+        (
+            product
+            for product in catalog
+            if product.product_id == contract.offer.product_id
+        ),
+        None
+    )
+
+    if primary_product is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Contract product not found in merchant catalog."
+        )
+
+    if primary_product.stock <= 0:
+        raise HTTPException(
+            status_code=409,
+            detail="Contract product is out of stock."
+        )
+
+    # 3. Contract price must match catalog price
+    if contract.offer.base_amount != primary_product.price:
+        raise HTTPException(
+            status_code=409,
+            detail="Contract price does not match merchant catalog price."
+        )
+
+    # 4. Enforce buyer maximum budget
+    max_budget = contract.buyer.max_budget
+
+    if (
+        max_budget is not None
+        and primary_product.price > max_budget
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Contract product exceeds the buyer's maximum budget."
+        )
+
+    current_total = primary_product.price
+    complementary_products = []
+
+    # 5. Select contract-compliant complementary products
+    candidates = []
+
+    for product in catalog:
+
+        if product.product_id == primary_product.product_id:
+            continue
+
+        if product.stock <= 0:
+            continue
+
+        if product.currency != contract.merchant.currency:
+            continue
+
+        if any(
+            tag in product.tags
+            for tag in contract.buyer.exclude_tags
+        ):
+            continue
+
+        if contract.buyer.required_tags:
+            if not all(
+                tag in product.tags
+                for tag in contract.buyer.required_tags
+            ):
+                continue
+
+        compatible = False
+
+        if primary_product.category == "Mouse":
+            compatible = product.category in ["Headphones", "Laptop"]
+
+        elif primary_product.category == "Laptop":
+            compatible = product.category in ["Mouse", "Headphones"]
+
+        elif primary_product.category == "Headphones":
+            compatible = product.category in ["Mouse", "Laptop"]
+
+        if not compatible:
+            continue
+
+        preferred_matches = sum(
+            1
+            for tag in contract.buyer.preferred_tags
+            if tag in product.tags
+        )
+
+        candidates.append((preferred_matches, product))
+
+    candidates.sort(
+        key=lambda item: item[0],
+        reverse=True
+    )
+
+    for preferred_matches, product in candidates:
+
+        if len(complementary_products) >= 2:
+            break
+
+        if (
+            max_budget is not None
+            and current_total + product.price > max_budget
+        ):
+            continue
+
+        complementary_products.append(
+            OfferItem(
+                product_id=product.product_id,
+                name=product.name,
+                price=product.price,
+                currency=product.currency,
+                reason=(
+                    f"Contract-compliant complementary product "
+                    f"for {primary_product.name}."
+                    + (
+                        f" Matches {preferred_matches} preferred tag(s)."
+                        if preferred_matches
+                        else ""
+                    )
+                )
+            )
+        )
+
+        current_total += product.price
+
+    # 6. Calculate final offer
+    subtotal = (
+        primary_product.price
+        + sum(item.price for item in complementary_products)
+    )
+
+    # Merchant discount ceiling
+    discount_percent = 0.0
+    discount_amount = 0
+
+    if discount_percent > contract.merchant.max_discount_percent:
+        raise HTTPException(
+            status_code=422,
+            detail="Offer discount exceeds the merchant maximum discount."
+        )
+
+    final_amount = subtotal - discount_amount
+
+    if final_amount <= 0:
+        raise HTTPException(
+            status_code=422,
+            detail="Contract discount produces an invalid final amount."
+        )
+
+    # 7. Audit-friendly bounds
+    bounded_by = [
+        "commerce_contract",
+        "merchant_catalog_prices",
+        "stock_availability",
+        "explicit_product_compatibility",
+        "buyer_constraints",
+        "required_tags",
+        "excluded_tags",
+        "merchant_max_discount"
+    ]
+
+    if max_budget is not None:
+        bounded_by.append("buyer_max_budget")
+
+    # 8. Primary item
+    primary_item = OfferItem(
+        product_id=primary_product.product_id,
+        name=primary_product.name,
+        price=primary_product.price,
+        currency=primary_product.currency,
+        reason="Primary product selected by the Commerce Contract."
+    )
+
+    # 9. Explanation
+    if complementary_products:
+        explanation = (
+            f"Contract-driven bundle combines "
+            f"{primary_product.name} with "
+            f"{len(complementary_products)} complementary "
+            "in-stock product(s). Buyer constraints and "
+            "merchant rules were enforced."
+        )
+    else:
+        explanation = (
+            f"Contract-driven offer contains "
+            f"{primary_product.name}. No additional "
+            "contract-compliant complementary products "
+            "were available within the buyer constraints."
+        )
+
+    # 10. Return offer
+    return OfferProposal(
+        primary_product=primary_item,
+        complementary_products=complementary_products,
+        subtotal=subtotal,
+        discount_amount=discount_amount,
+        final_amount=final_amount,
+        currency=primary_product.currency,
+        discount_percent=discount_percent,
+        explanation=explanation,
+        bounded_by=bounded_by
+    )
+
+
+@app.post(
+    "/offer-from-contract",
+    response_model=OfferProposal
+)
+def create_offer_from_contract(
+    contract: CommerceContract
+):
+    return _create_offer_from_contract(contract)
+
+
+# ============================================================
+# REVENUE AGENT
+# ============================================================
+
+@app.get(
+    "/revenue-agent",
+    response_model=RevenueAgentResponse
+)
+def revenue_agent():
+
+    completed_orders = 0
+    total_revenue = 0.0
+    pending_payments = 0
+    failed_payments = 0
+
+    product_sales = {}
+
+    for stored in intents.values():
+
+        status = stored.get("status")
+        payment = stored.get("payment") or {}
+        intent = stored.get("intent")
+
+        # Only a server-verified, captured payment counts
+        # as completed revenue.
+        if (
+            status == "payment_verified"
+            and payment.get("captured") is True
+        ):
+
+            amount = payment.get("amount")
+
+            if isinstance(amount, (int, float)):
+
+                completed_orders += 1
+                total_revenue += float(amount)
+
+            purpose = getattr(intent, "purpose", "")
+
+            for product in catalog:
+
+                if product.name in purpose:
+
+                    product_sales[product.product_id] = (
+                        product_sales.get(product.product_id, 0) + 1
+                    )
+
+                    break
+
+        elif status in [
+            "payment_pending",
+            "payment_authorized"
+        ]:
+
+            pending_payments += 1
+
+        elif status == "payment_failed":
+
+            failed_payments += 1
+
+    average_order_value = (
+        total_revenue / completed_orders
+        if completed_orders
+        else 0.0
+    )
+
+    metrics = [
+        RevenueMetric(
+            metric="completed_orders",
+            value=completed_orders
+        ),
+        RevenueMetric(
+            metric="total_revenue",
+            value=total_revenue
+        ),
+        RevenueMetric(
+            metric="average_order_value",
+            value=average_order_value
+        ),
+        RevenueMetric(
+            metric="pending_payments",
+            value=pending_payments
+        ),
+        RevenueMetric(
+            metric="failed_payments",
+            value=failed_payments
+        )
+    ]
+
+    opportunities = []
+
+    # Identify products with completed sales and suggest
+    # complementary catalog products that could increase
+    # basket size. No revenue is attributed to the suggestion.
+    for product_id, sales_count in product_sales.items():
+
+        purchased_product = next(
+            (
+                product
+                for product in catalog
+                if product.product_id == product_id
+            ),
+            None
+        )
+
+        if purchased_product is None:
+            continue
+
+        for product in catalog:
+
+            if product.product_id == purchased_product.product_id:
+                continue
+
+            if product.stock <= 0:
+                continue
+
+            compatible = False
+
+            if purchased_product.category == "Mouse":
+
+                compatible = product.category in [
+                    "Headphones",
+                    "Laptop"
+                ]
+
+            elif purchased_product.category == "Laptop":
+
+                compatible = product.category in [
+                    "Mouse",
+                    "Headphones"
+                ]
+
+            elif purchased_product.category == "Headphones":
+
+                compatible = product.category in [
+                    "Mouse",
+                    "Laptop"
+                ]
+
+            if compatible:
+
+                opportunities.append(
+                    RevenueOpportunity(
+                        product_id=product.product_id,
+                        product_name=product.name,
+                        opportunity="Cross-sell",
+                        reason=(
+                            f"{purchased_product.name} has "
+                            f"{sales_count} completed purchase(s). "
+                            f"{product.name} is an in-stock "
+                            "complementary product."
+                        ),
+                        potential_action=(
+                            f"Offer {product.name} after "
+                            f"{purchased_product.name} selection."
+                        )
+                    )
+                )
+
+    if completed_orders:
+
+        explanation = (
+            "Revenue metrics are calculated from persisted "
+            "commerce intents and server-verified captured "
+            "Razorpay payments. Opportunities are catalog-based "
+            "cross-sell suggestions and are not counted as revenue."
+        )
+
+    else:
+
+        explanation = (
+            "No completed server-verified payments are currently "
+            "recorded. Revenue is not estimated. Opportunities "
+            "are generated only from actual completed purchases."
+        )
+
+    return RevenueAgentResponse(
+        merchant="AI Commerce Demo Store",
+        completed_orders=completed_orders,
+        total_revenue=total_revenue,
+        average_order_value=average_order_value,
+        pending_payments=pending_payments,
+        failed_payments=failed_payments,
+        metrics=metrics,
+        opportunities=opportunities,
+        explanation=explanation,
+        data_source=(
+            "Persisted purchase intents and server-verified "
+            "Razorpay payment records"
+        )
+    )
+
+
+# ============================================================
 # SHOP
 # ============================================================
 
@@ -1269,6 +2054,69 @@ def conversational_shop(
     }
 
     # --------------------------------------------------------
+    # 15A. Create Commerce Contract
+    # --------------------------------------------------------
+
+    commerce_contract = CommerceContract(
+        buyer=BuyerConstraints(
+            query=request.message.strip(),
+            category=product.category,
+            max_budget=budget,
+            required_tags=[],
+            preferred_tags=features,
+            exclude_tags=[]
+        ),
+        merchant=MerchantRules(
+            currency=product.currency,
+            user_approval_required=True,
+            max_discount_percent=0
+        ),
+        offer=CommerceOffer(
+            product_id=product.product_id,
+            product_name=product.name,
+            base_amount=product.price,
+            discount_amount=0,
+            final_amount=product.price,
+            currency=product.currency
+        ),
+        policy_approved=False,
+        user_authorized=False,
+        intent_id=intent_id
+    )
+
+    # --------------------------------------------------------
+    # 15B. Generate validated Offer from Contract
+    # --------------------------------------------------------
+
+    offer = _create_offer_from_contract(commerce_contract)
+
+    # Synchronize the Commerce Contract with the validated final offer.
+    commerce_contract.offer.final_amount = offer.final_amount
+    commerce_contract.policy_approved = policy_result["allowed"]
+
+    # The validated offer is the amount that will actually be purchased.
+    # Keep the purchase intent synchronized with that approved offer.
+    intent.max_amount = offer.final_amount
+
+    # Re-check policy against the final validated offer amount.
+    policy_result = check_policy(intent)
+
+    if not policy_result["allowed"]:
+        raise HTTPException(
+            status_code=403,
+            detail=policy_result["reason"]
+        )
+
+    # --------------------------------------------------------
+    # 15C. Persist Contract + Offer with Intent
+    # --------------------------------------------------------
+
+    intents[intent_id]["commerce_contract"] = commerce_contract
+    intents[intent_id]["offer"] = offer
+
+    save_intents()
+
+    # --------------------------------------------------------
     # 16. Audit
     # --------------------------------------------------------
 
@@ -1420,6 +2268,9 @@ def approve_intent(
         if approval.approved
         else "rejected"
     )
+
+    if stored_intent.get("commerce_contract"):
+        stored_intent["commerce_contract"].user_authorized = approval.approved
 
     save_intents()
 
@@ -1598,7 +2449,7 @@ def execute_intent(
         save_intents()
         save_audit_logs()
 
-    except Exception:
+    except Exception as exc:
 
         stored_intent["status"] = "payment_failed"
 
@@ -2086,11 +2937,10 @@ async def razorpay_webhook(
             {}
         )
 
-        if not expected_payment_id:
-            return {
-                "status": "ignored",
-                "reason": "order_paid_missing_payment_id"
-            }
+        # `order.paid` identifies the paid order directly.
+        # A payment_id may not have been stored yet if the webhook
+        # arrives before the frontend calls /payment/verify.
+        # The order_id has already been matched against server state.
 
         # ----------------------------------------------------
         # Order-paid webhook idempotency
@@ -2226,7 +3076,73 @@ def get_intent_status(
         ),
         "session_id": stored.get(
             "session_id"
+        ),
+        "commerce_contract": stored.get(
+            "commerce_contract"
+        ),
+        "offer": stored.get(
+            "offer"
         )
+    }
+
+
+# ============================================================
+# ORDER HISTORY
+# ============================================================
+
+@app.get("/orders")
+def get_orders():
+
+    orders = []
+
+    for intent_id, stored in intents.items():
+
+        payment = stored.get("payment") or {}
+
+        if not payment:
+            continue
+
+        order_id = payment.get("order_id")
+
+        if not order_id:
+            continue
+
+        # Expose only real merchant orders.
+        if payment.get("merchant") != "AI Commerce Demo Store":
+            continue
+
+        if payment.get("amount") is None:
+            continue
+
+        orders.append(
+            {
+                "intent_id": intent_id,
+                "order_id": order_id,
+                "payment_id": payment.get("payment_id"),
+                "status": stored.get(
+                    "status",
+                    payment.get("status", "unknown")
+                ),
+                "amount": payment.get("amount"),
+                "currency": payment.get(
+                    "currency",
+                    "INR"
+                ),
+                "captured": payment.get(
+                    "captured",
+                    False
+                ),
+                "merchant": payment.get(
+                    "merchant"
+                )
+            }
+        )
+
+    orders.reverse()
+
+    return {
+        "orders": orders,
+        "count": len(orders)
     }
 
 

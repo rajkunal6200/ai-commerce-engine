@@ -2,6 +2,7 @@ import main
 import pytest
 
 from fastapi.testclient import TestClient
+from models.intent import IntentContract
 
 
 client = TestClient(main.app)
@@ -1062,3 +1063,313 @@ def test_commerce_profile_exposes_real_catalog_and_rules():
     assert products["MS001"]["stock"] == 40
     assert products["MS001"]["available"] is True
 
+
+
+# ============================================================
+# REVENUE AGENT
+# ============================================================
+
+
+def test_revenue_agent_reports_persisted_payment_state():
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["merchant"] == "AI Commerce Demo Store"
+    assert data["completed_orders"] == 0
+    assert data["total_revenue"] == 0.0
+    assert data["average_order_value"] == 0.0
+    assert data["pending_payments"] == 0
+    assert data["failed_payments"] == 0
+    assert data["opportunities"] == []
+    assert (
+        data["data_source"]
+        == (
+            "Persisted purchase intents and server-verified "
+            "Razorpay payment records"
+        )
+    )
+
+
+def test_revenue_agent_counts_only_verified_captured_payments():
+    intent = IntentContract(
+        merchant="AI Commerce Demo Store",
+        purpose="Buy ProBook Laptop",
+        max_amount=50000,
+        currency="INR",
+        user_approval_required=True
+    )
+
+    main.intents["revenue-test-verified"] = {
+        "intent": intent,
+        "policy": {
+            "allowed": True,
+            "reason": "Allowed"
+        },
+        "approved": True,
+        "status": "payment_verified",
+        "payment": {
+            "status": "payment_verified",
+            "order_id": "order_revenue_test",
+            "payment_id": "pay_revenue_test",
+            "amount": 50000,
+            "currency": "INR",
+            "captured": True
+        },
+        "execution_count": 1
+    }
+
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["completed_orders"] == 1
+    assert data["total_revenue"] == 50000.0
+    assert data["average_order_value"] == 50000.0
+    assert data["pending_payments"] == 0
+    assert data["failed_payments"] == 0
+
+    opportunity_ids = {
+        opportunity["product_id"]
+        for opportunity in data["opportunities"]
+    }
+
+    assert opportunity_ids == {
+        "HP001",
+        "MS001"
+    }
+
+
+def test_revenue_agent_does_not_count_pending_payment():
+    intent = IntentContract(
+        merchant="AI Commerce Demo Store",
+        purpose="Buy ProBook Laptop",
+        max_amount=50000,
+        currency="INR",
+        user_approval_required=True
+    )
+
+    main.intents["revenue-test-pending"] = {
+        "intent": intent,
+        "policy": {
+            "allowed": True,
+            "reason": "Allowed"
+        },
+        "approved": True,
+        "status": "payment_pending",
+        "payment": {
+            "status": "payment_pending",
+            "order_id": "order_pending_test",
+            "amount": 50000,
+            "currency": "INR"
+        },
+        "execution_count": 1
+    }
+
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["completed_orders"] == 0
+    assert data["total_revenue"] == 0.0
+    assert data["average_order_value"] == 0.0
+    assert data["pending_payments"] == 1
+
+
+def test_revenue_agent_does_not_count_failed_payment():
+    intent = IntentContract(
+        merchant="AI Commerce Demo Store",
+        purpose="Buy ProMouse",
+        max_amount=1500,
+        currency="INR",
+        user_approval_required=True
+    )
+
+    main.intents["revenue-test-failed"] = {
+        "intent": intent,
+        "policy": {
+            "allowed": True,
+            "reason": "Allowed"
+        },
+        "approved": True,
+        "status": "payment_failed",
+        "payment": {
+            "status": "payment_failed",
+            "amount": 1500,
+            "currency": "INR"
+        },
+        "execution_count": 1
+    }
+
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["completed_orders"] == 0
+    assert data["total_revenue"] == 0.0
+    assert data["average_order_value"] == 0.0
+    assert data["pending_payments"] == 0
+    assert data["failed_payments"] == 1
+
+
+# ============================================================
+# REVENUE AGENT
+# ============================================================
+
+
+def test_revenue_agent_reports_persisted_payment_state():
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["merchant"] == "AI Commerce Demo Store"
+    assert data["completed_orders"] == 0
+    assert data["total_revenue"] == 0.0
+    assert data["average_order_value"] == 0.0
+    assert data["pending_payments"] == 0
+    assert data["failed_payments"] == 0
+    assert data["opportunities"] == []
+    assert (
+        data["data_source"]
+        == (
+            "Persisted purchase intents and server-verified "
+            "Razorpay payment records"
+        )
+    )
+
+
+def test_revenue_agent_counts_only_verified_captured_payments():
+    intent = IntentContract(
+        merchant="AI Commerce Demo Store",
+        purpose="Buy ProBook Laptop",
+        max_amount=50000,
+        currency="INR",
+        user_approval_required=True
+    )
+
+    main.intents["revenue-test-verified"] = {
+        "intent": intent,
+        "policy": {
+            "allowed": True,
+            "reason": "Allowed"
+        },
+        "approved": True,
+        "status": "payment_verified",
+        "payment": {
+            "status": "payment_verified",
+            "order_id": "order_revenue_test",
+            "payment_id": "pay_revenue_test",
+            "amount": 50000,
+            "currency": "INR",
+            "captured": True
+        },
+        "execution_count": 1
+    }
+
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["completed_orders"] == 1
+    assert data["total_revenue"] == 50000.0
+    assert data["average_order_value"] == 50000.0
+    assert data["pending_payments"] == 0
+    assert data["failed_payments"] == 0
+
+    opportunity_ids = {
+        opportunity["product_id"]
+        for opportunity in data["opportunities"]
+    }
+
+    assert opportunity_ids == {
+        "HP001",
+        "MS001"
+    }
+
+
+def test_revenue_agent_does_not_count_pending_payment():
+    intent = IntentContract(
+        merchant="AI Commerce Demo Store",
+        purpose="Buy ProBook Laptop",
+        max_amount=50000,
+        currency="INR",
+        user_approval_required=True
+    )
+
+    main.intents["revenue-test-pending"] = {
+        "intent": intent,
+        "policy": {
+            "allowed": True,
+            "reason": "Allowed"
+        },
+        "approved": True,
+        "status": "payment_pending",
+        "payment": {
+            "status": "payment_pending",
+            "order_id": "order_pending_test",
+            "amount": 50000,
+            "currency": "INR"
+        },
+        "execution_count": 1
+    }
+
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["completed_orders"] == 0
+    assert data["total_revenue"] == 0.0
+    assert data["average_order_value"] == 0.0
+    assert data["pending_payments"] == 1
+
+
+def test_revenue_agent_does_not_count_failed_payment():
+    intent = IntentContract(
+        merchant="AI Commerce Demo Store",
+        purpose="Buy ProMouse",
+        max_amount=1500,
+        currency="INR",
+        user_approval_required=True
+    )
+
+    main.intents["revenue-test-failed"] = {
+        "intent": intent,
+        "policy": {
+            "allowed": True,
+            "reason": "Allowed"
+        },
+        "approved": True,
+        "status": "payment_failed",
+        "payment": {
+            "status": "payment_failed",
+            "amount": 1500,
+            "currency": "INR"
+        },
+        "execution_count": 1
+    }
+
+    response = client.get("/revenue-agent")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["completed_orders"] == 0
+    assert data["total_revenue"] == 0.0
+    assert data["average_order_value"] == 0.0
+    assert data["pending_payments"] == 0
+    assert data["failed_payments"] == 1

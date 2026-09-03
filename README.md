@@ -1,5 +1,7 @@
 # AI Commerce Engine
 
+> Agentic commerce with deterministic payment safety.
+
 ## Overview
 
 AI Commerce Engine is a secure, conversational commerce system that turns natural-language shopping requests into controlled purchase workflows.
@@ -11,6 +13,12 @@ The system combines AI-powered shopping assistance with policy enforcement, expl
 User Request → AI Understanding → Recommendation → Purchase Intent → Policy Check → User Approval → Secure Execution → Razorpay Checkout → Server-Side Payment Verification → Audit Trail
 
 ## Features
+
+- Buyer Intent Engine
+- Commerce Contract
+- Budget-bounded Offer Engine
+- Merchant Controls
+- Revenue Agent
 
 - Natural-language shopping
 - AI-powered product recommendations
@@ -52,33 +60,6 @@ ai-commerce-engine/
     ├── index.html
     ├── app.js
     └── style.css
-```
-
-## Project Structure
-
-```text
-ai-commerce-engine/
-├── main.py
-├── payment.py
-├── policy.py
-├── requirements.txt
-├── .env.example
-├── .gitignore
-│
-├── models/
-│   └── audit.py
-│
-├── tests/
-│   ├── test_api.py
-│   ├── test_payment.py
-│   ├── test_persistence.py
-│   └── test_webhook.py
-│
-└── frontend/
-    ├── index.html
-    ├── app.js
-    └── style.css
-
 ```
 
 ## Tech Stack
@@ -154,6 +135,12 @@ The application follows a controlled purchase lifecycle:
 - `POST /shop` — Process a shopping request
 - `POST /conversational-shop` — Continue a conversational shopping session
 
+### Commerce Contract & Offers
+
+- `POST /commerce-contract` — Create a structured commerce contract
+- `POST /offer` — Generate an offer proposal
+- `POST /offer-from-contract` — Generate a server-validated offer from a Commerce Contract
+
 ### Intent & Approval
 
 - `POST /intent` — Create a purchase intent
@@ -180,6 +167,26 @@ Razorpay Checkout
 → Audit Trail Updated
 
 The frontend never acts as the final authority for payment success.
+
+## Security Architecture
+
+The system follows a defense-in-depth model:
+
+`AI proposes → Server validates → User authorizes → Razorpay processes → Server verifies → Webhook confirms → Audit records`
+
+Key protections:
+- Server-authoritative purchase amount
+- Merchant catalog price validation
+- Buyer budget enforcement
+- Policy enforcement
+- Explicit user approval
+- Razorpay signature verification
+- Order, amount, and currency validation
+- Webhook signature verification
+- Webhook event-id idempotency
+- Stale webhook protection
+- Payment failure downgrade protection
+- Persistent audit trail
 
 ## Product Catalog
 

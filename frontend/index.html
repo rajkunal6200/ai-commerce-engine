@@ -67,6 +67,15 @@
                     Orders
                 </button>
 
+                <button
+                    class="nav-item"
+                    id="merchantButton"
+                    type="button"
+                >
+                    <span>⌁</span>
+                    Merchant Control
+                </button>
+
             </nav>
 
 
@@ -247,6 +256,253 @@
                     class="messages"
                     id="messages"
                 ></div>
+
+            </section>
+
+
+            <!-- =================================
+                 ORDERS
+            ================================== -->
+
+            <section
+                class="merchant-dashboard hidden"
+                id="ordersView"
+            >
+
+                <div class="dashboard-header">
+
+                    <div>
+                        <div class="eyebrow">
+                            ORDER HISTORY
+                        </div>
+
+                        <h2>
+                            Your <span>orders.</span>
+                        </h2>
+
+                        <p>
+                            View persisted commerce transactions
+                            and verified payment status.
+                        </p>
+                    </div>
+
+                    <button
+                        class="button secondary"
+                        id="ordersRefreshButton"
+                        type="button"
+                    >
+                        ↻ Refresh
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="dashboard-panel"
+                    id="ordersList"
+                >
+                    <div class="dashboard-empty">
+                        Loading orders...
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 MERCHANT CONTROL DASHBOARD
+            ================================== -->
+
+            <section
+                class="merchant-dashboard hidden"
+                id="merchantDashboard"
+            >
+
+                <div class="dashboard-header">
+
+                    <div>
+                        <div class="eyebrow">
+                            MERCHANT CONTROL
+                        </div>
+
+                        <h2>
+                            Revenue
+                            <span>intelligence.</span>
+                        </h2>
+
+                        <p>
+                            Monitor verified commerce activity,
+                            payment outcomes, and actionable
+                            cross-sell opportunities.
+                        </p>
+                    </div>
+
+                    <button
+                        class="button secondary dashboard-refresh"
+                        id="dashboardRefreshButton"
+                        type="button"
+                    >
+                        ↻ Refresh
+                    </button>
+
+                </div>
+
+
+                <div class="dashboard-metrics">
+
+                    <div class="dashboard-metric-card">
+                        <span class="metric-label">
+                            VERIFIED REVENUE
+                        </span>
+                        <strong id="dashboardRevenue">₹0</strong>
+                        <span class="metric-meta">
+                            Server-verified captured payments
+                        </span>
+                    </div>
+
+                    <div class="dashboard-metric-card">
+                        <span class="metric-label">
+                            COMPLETED ORDERS
+                        </span>
+                        <strong id="dashboardOrders">0</strong>
+                        <span class="metric-meta">
+                            Confirmed commerce transactions
+                        </span>
+                    </div>
+
+                    <div class="dashboard-metric-card">
+                        <span class="metric-label">
+                            AVERAGE ORDER VALUE
+                        </span>
+                        <strong id="dashboardAov">₹0</strong>
+                        <span class="metric-meta">
+                            Verified orders only
+                        </span>
+                    </div>
+
+                    <div class="dashboard-metric-card">
+                        <span class="metric-label">
+                            PAYMENT ISSUES
+                        </span>
+                        <strong id="dashboardPaymentIssues">0</strong>
+                        <span class="metric-meta">
+                            Pending + failed payments
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-grid">
+
+                    <div class="dashboard-panel">
+
+                        <div class="dashboard-panel-header">
+
+                            <div>
+                                <div class="section-label">
+                                    REVENUE AGENT
+                                </div>
+
+                                <h3>
+                                    Growth opportunities
+                                </h3>
+                            </div>
+
+                            <span
+                                class="dashboard-live-badge"
+                                id="dashboardDataStatus"
+                            >
+                                Live data
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="dashboard-opportunities"
+                            id="dashboardOpportunities"
+                        >
+                            <div class="dashboard-empty">
+                                Loading commerce opportunities...
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-panel">
+
+                        <div class="dashboard-panel-header">
+
+                            <div>
+                                <div class="section-label">
+                                    COMMERCE PROFILE
+                                </div>
+
+                                <h3>
+                                    Agent-readable merchant
+                                </h3>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="dashboard-profile"
+                            id="dashboardProfile"
+                        >
+                            <div class="dashboard-empty">
+                                Loading merchant profile...
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-panel">
+
+                    <div class="dashboard-panel-header">
+
+                        <div>
+                            <div class="section-label">
+                                PRODUCT CATALOG
+                            </div>
+
+                            <h3>
+                                Agent-discoverable inventory
+                            </h3>
+                        </div>
+
+                        <span
+                            class="dashboard-count"
+                            id="dashboardCatalogCount"
+                        >
+                            0 products
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="dashboard-catalog"
+                        id="dashboardCatalog"
+                    >
+                        <div class="dashboard-empty">
+                            Loading catalog...
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="dashboard-explanation"
+                    id="dashboardExplanation"
+                >
+                    Revenue intelligence is calculated from
+                    persisted commerce intents and server-verified
+                    Razorpay payment records.
+                </div>
 
             </section>
 
