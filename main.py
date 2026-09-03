@@ -729,9 +729,37 @@ def find_matching_products(
 
     matches = []
 
+    # Explicit product categories in the buyer query are hard
+    # constraints. A different category must never win merely
+    # because it shares a feature such as "wireless".
+    requested_category = None
+
+    category_aliases = {
+        "laptop": "laptop",
+        "laptops": "laptop",
+        "headphone": "headphones",
+        "headphones": "headphones",
+        "mouse": "mouse",
+        "mice": "mouse",
+    }
+
+    for word in query_words:
+        if word in category_aliases:
+            requested_category = category_aliases[word]
+            break
+
     for product in catalog:
 
         if product.price > max_price:
+            continue
+
+        if product.stock <= 0:
+            continue
+
+        if (
+            requested_category is not None
+            and product.category.lower() != requested_category
+        ):
             continue
 
         if product.stock <= 0:
@@ -2037,6 +2065,8 @@ def conversational_shop(
             "features": [],
             "purpose": None,
             "max_price": None,
+            "stage": "discovery",
+            "last_intent_id": None,
             "history": []
         }
 
@@ -2118,6 +2148,7 @@ def conversational_shop(
         return {
             "session_id": session_id,
             "buyer_message": request.message,
+            "stage": conversation["stage"],
             "understanding": {
                 "product_type": product_type,
                 "features": features,
@@ -2142,6 +2173,7 @@ def conversational_shop(
         return {
             "session_id": session_id,
             "buyer_message": request.message,
+            "stage": conversation["stage"],
             "understanding": {
                 "product_type": None,
                 "features": features,
@@ -2187,9 +2219,12 @@ def conversational_shop(
 
     if not matches:
 
+        conversation["stage"] = "discovery"
+
         return {
             "session_id": session_id,
             "buyer_message": request.message,
+            "stage": conversation["stage"],
             "understanding": {
                 "product_type": product_type,
                 "features": features,
@@ -2408,7 +2443,16 @@ def conversational_shop(
     )
 
     # --------------------------------------------------------
-    # 17. Save assistant response
+    # 17. Mark conversation stage
+    # --------------------------------------------------------
+
+    previous_intent_id = conversation.get("last_intent_id")
+
+    conversation["stage"] = "intent_created"
+    conversation["last_intent_id"] = intent_id
+
+    # --------------------------------------------------------
+    # 18. Save assistant response
     # --------------------------------------------------------
 
     response_message = (
@@ -2431,6 +2475,9 @@ def conversational_shop(
     return {
         "session_id": session_id,
         "buyer_message": request.message,
+        "stage": conversation["stage"],
+        "last_intent_id": conversation["last_intent_id"],
+        "refined_from_intent_id": previous_intent_id,
         "understanding": {
             "product_type": product_type,
             "features": features,
