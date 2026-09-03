@@ -10,6 +10,7 @@ from models.buyer_intent import BuyerIntent, BuyerIntentRequest, BuyerIntentResp
 from models.catalog import Product
 from models.commerce_contract import CommerceContract, BuyerConstraints, MerchantRules, CommerceOffer
 from models.offer import OfferRequest, OfferItem, OfferProposal
+from models.decision import DecisionTrace, DecisionFactor
 from models.revenue import (
     RevenueMetric,
     RevenueOpportunity,
@@ -704,8 +705,19 @@ def understand_buyer(
 
 def find_matching_products(
     query: str,
-    max_price: int
+    max_price: int,
+    preferred_tags=None,
+    excluded_tags=None
 ):
+    preferred_tags = [
+        tag.lower()
+        for tag in (preferred_tags or [])
+    ]
+
+    excluded_tags = [
+        tag.lower()
+        for tag in (excluded_tags or [])
+    ]
 
     raw_words = query.lower().split()
 
@@ -734,7 +746,23 @@ def find_matching_products(
             for tag in product.tags
         ]
 
+        # Personalization safety boundary:
+        # excluded preferences always remove the product.
+        if any(tag in product_tags for tag in excluded_tags):
+            continue
+
         score = 0
+
+        # Personalization boost:
+        # preferred tags improve ranking but never bypass
+        # budget, stock, or relevance requirements.
+        preferred_matches = sum(
+            1
+            for tag in preferred_tags
+            if tag in product_tags
+        )
+
+        score += preferred_matches * 2
         matched_words = []
 
         for word in query_words:
@@ -869,7 +897,9 @@ def recommend_products(
 
     matches = find_matching_products(
         request.query,
-        request.max_price
+        request.max_price,
+        request.preferred_tags,
+        request.excluded_tags
     )
 
     recommended_products = []
@@ -909,9 +939,59 @@ def recommend_products(
             "buyer's request within the price limit."
         )
 
+    decision_trace = DecisionTrace(
+        decision_type="recommendation",
+        decision=(
+            "Recommend matching in-stock products within "
+            "the buyer's maximum price."
+        ),
+        factors=[
+            DecisionFactor(
+                factor="buyer_query",
+                value=request.query,
+                impact="Determines product relevance."
+            ),
+            DecisionFactor(
+                factor="maximum_price",
+                value=f"INR {request.max_price}",
+                impact="Excludes products above the buyer's budget."
+            ),
+            DecisionFactor(
+                factor="relevance",
+                value=f"{len(recommended_products)} matching product(s)",
+                impact="Prioritizes products matching the buyer's intent."
+            ),
+            DecisionFactor(
+                factor="availability",
+                value="in-stock products only",
+                impact="Prevents unavailable products from being recommended."
+            ),
+            DecisionFactor(
+                factor="preferred_tags",
+                value=(
+                    ", ".join(request.preferred_tags)
+                    if request.preferred_tags
+                    else "none"
+                ),
+                impact="Boosts products matching the buyer's stated preferences."
+            ),
+            DecisionFactor(
+                factor="excluded_tags",
+                value=(
+                    ", ".join(request.excluded_tags)
+                    if request.excluded_tags
+                    else "none"
+                ),
+                impact="Removes products containing buyer-excluded attributes."
+            ),
+        ],
+        explanation=explanation
+    )
+
     return RecommendationResponse(
         products=recommended_products,
-        explanation=explanation
+        explanation=explanation,
+        decision_trace=decision_trace
     )
 
 
@@ -1180,6 +1260,41 @@ def create_offer(
     if request.max_budget is not None:
         bounded_by.append("buyer_max_budget")
 
+    decision_trace = DecisionTrace(
+        decision_type="offer",
+        decision=(
+            f"Build a bounded offer for {primary_product.name} "
+            "using catalog, stock, compatibility, and buyer constraints."
+        ),
+        factors=[
+            DecisionFactor(
+                factor="primary_product",
+                value=primary_product.name,
+                impact="Selected from the merchant catalog."
+            ),
+            DecisionFactor(
+                factor="complementary_products",
+                value=f"{len(complementary_products)} selected",
+                impact="Only compatible and in-stock products were included."
+            ),
+            DecisionFactor(
+                factor="budget",
+                value=(
+                    f"INR {request.max_budget}"
+                    if request.max_budget is not None
+                    else "not specified"
+                ),
+                impact="Limits the total offer when a buyer budget is provided."
+            ),
+            DecisionFactor(
+                factor="discount",
+                value=f"{discount_percent}% / INR {discount_amount}",
+                impact="No unconfigured discount is applied."
+            ),
+        ],
+        explanation=explanation
+    )
+
     return OfferProposal(
         primary_product=primary_item,
         complementary_products=complementary_products,
@@ -1189,7 +1304,8 @@ def create_offer(
         currency=primary_product.currency,
         discount_percent=discount_percent,
         explanation=explanation,
-        bounded_by=bounded_by
+        bounded_by=bounded_by,
+        decision_trace=decision_trace
     )
 
 
@@ -1340,9 +1456,20 @@ def _create_offer_from_contract(
         + sum(item.price for item in complementary_products)
     )
 
-    # Merchant discount ceiling
-    discount_percent = 0.0
-    discount_amount = 0
+    # Merchant-bounded dynamic discount
+    # The engine may propose up to 5%, but never above
+    # the merchant-configured maximum.
+    discount_percent = min(
+        5.0,
+        contract.merchant.max_discount_percent
+    )
+
+    discount_amount = int(
+        subtotal * discount_percent / 100
+    )
+
+    if discount_amount >= subtotal:
+        discount_amount = max(0, subtotal - 1)
 
     if discount_percent > contract.merchant.max_discount_percent:
         raise HTTPException(
@@ -1399,7 +1526,53 @@ def _create_offer_from_contract(
             "were available within the buyer constraints."
         )
 
-    # 10. Return offer
+    # 10. Explainable offer decision
+    decision_trace = DecisionTrace(
+        decision_type="bounded_offer",
+        decision=(
+            f"Build a contract-compliant bundle for "
+            f"{primary_product.name} with bounded dynamic pricing."
+        ),
+        factors=[
+            DecisionFactor(
+                factor="primary_product",
+                value=primary_product.name,
+                impact="Selected from the merchant catalog and validated against the Commerce Contract."
+            ),
+            DecisionFactor(
+                factor="complementary_products",
+                value=f"{len(complementary_products)} selected",
+                impact="Only compatible, in-stock products satisfying buyer constraints were included."
+            ),
+            DecisionFactor(
+                factor="subtotal",
+                value=f"INR {subtotal}",
+                impact="Determines the bundle value before discount."
+            ),
+            DecisionFactor(
+                factor="merchant_discount_limit",
+                value=f"{contract.merchant.max_discount_percent}%",
+                impact="Sets the absolute merchant-authorized discount ceiling."
+            ),
+            DecisionFactor(
+                factor="applied_discount",
+                value=f"{discount_percent}% / INR {discount_amount}",
+                impact="Dynamic discount is capped at 5% and cannot exceed the merchant limit."
+            ),
+            DecisionFactor(
+                factor="buyer_budget",
+                value=(
+                    f"INR {max_budget}"
+                    if max_budget is not None
+                    else "not specified"
+                ),
+                impact="Prevents the selected bundle from exceeding the buyer's maximum budget."
+            ),
+        ],
+        explanation=explanation
+    )
+
+    # 11. Return offer
     return OfferProposal(
         primary_product=primary_item,
         complementary_products=complementary_products,
@@ -1409,7 +1582,8 @@ def _create_offer_from_contract(
         currency=primary_product.currency,
         discount_percent=discount_percent,
         explanation=explanation,
-        bounded_by=bounded_by
+        bounded_by=bounded_by,
+        decision_trace=decision_trace
     )
 
 
@@ -1599,6 +1773,57 @@ def revenue_agent():
             "are generated only from actual completed purchases."
         )
 
+    # Revenue Agent 2.0 decision intelligence
+    revenue_health = (
+        "healthy"
+        if completed_orders > 0 and failed_payments == 0
+        else "attention_required"
+        if failed_payments > 0 or pending_payments > 0
+        else "no_completed_revenue"
+    )
+
+    decision_trace = DecisionTrace(
+        decision_type="revenue_analysis",
+        decision=(
+            "Analyze verified merchant revenue and identify "
+            "bounded catalog-based growth opportunities."
+        ),
+        factors=[
+            DecisionFactor(
+                factor="completed_orders",
+                value=str(completed_orders),
+                impact="Counts only server-verified captured payments."
+            ),
+            DecisionFactor(
+                factor="total_revenue",
+                value=f"INR {total_revenue:.2f}",
+                impact="Measures realized revenue from verified payments."
+            ),
+            DecisionFactor(
+                factor="average_order_value",
+                value=f"INR {average_order_value:.2f}",
+                impact="Measures the merchant's realized average basket value."
+            ),
+            DecisionFactor(
+                factor="payment_health",
+                value=revenue_health,
+                impact=(
+                    "Highlights pending or failed payment states "
+                    "without estimating missing revenue."
+                )
+            ),
+            DecisionFactor(
+                factor="cross_sell_opportunities",
+                value=str(len(opportunities)),
+                impact=(
+                    "Identifies compatible in-stock catalog products "
+                    "that may increase basket size."
+                )
+            ),
+        ],
+        explanation=explanation
+    )
+
     return RevenueAgentResponse(
         merchant="AI Commerce Demo Store",
         completed_orders=completed_orders,
@@ -1612,7 +1837,8 @@ def revenue_agent():
         data_source=(
             "Persisted purchase intents and server-verified "
             "Razorpay payment records"
-        )
+        ),
+        decision_trace=decision_trace
     )
 
 

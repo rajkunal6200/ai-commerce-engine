@@ -1,5 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
+from models.decision import DecisionTrace
 
 
 class OfferRequest(BaseModel):
@@ -26,3 +27,4 @@ class OfferProposal(BaseModel):
     discount_percent: float = Field(default=0, ge=0, le=100)
     explanation: str
     bounded_by: List[str] = Field(default_factory=list)
+    decision_trace: DecisionTrace

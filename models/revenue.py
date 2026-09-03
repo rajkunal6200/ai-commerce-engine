@@ -1,5 +1,6 @@
 from typing import List
 from pydantic import BaseModel, Field
+from models.decision import DecisionTrace
 
 
 class RevenueMetric(BaseModel):
@@ -27,3 +28,4 @@ class RevenueAgentResponse(BaseModel):
     opportunities: List[RevenueOpportunity] = Field(default_factory=list)
     explanation: str
     data_source: str
+    decision_trace: DecisionTrace
