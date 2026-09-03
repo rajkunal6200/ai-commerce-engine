@@ -1373,3 +1373,23 @@ def test_revenue_agent_does_not_count_failed_payment():
     assert data["average_order_value"] == 0.0
     assert data["pending_payments"] == 0
     assert data["failed_payments"] == 1
+
+
+def test_request_id_is_generated_when_missing():
+    response = client.get("/")
+
+    assert response.status_code == 200
+    request_id = response.headers.get("X-Request-ID")
+
+    assert request_id
+    assert len(request_id) == 36
+
+
+def test_request_id_is_preserved_when_supplied():
+    response = client.get(
+        "/",
+        headers={"X-Request-ID": "demo-v3-test-001"}
+    )
+
+    assert response.status_code == 200
+    assert response.headers["X-Request-ID"] == "demo-v3-test-001"
