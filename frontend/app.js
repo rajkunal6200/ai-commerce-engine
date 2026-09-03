@@ -83,6 +83,63 @@ setState(
 // SEND MESSAGE
 // ============================================================
 
+async function refreshCommerceLoop() {
+    if (!currentIntentId) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/commerce-loop/${currentIntentId}`,
+            {
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        if (!response.ok) {
+            return;
+        }
+
+        const loop = await response.json();
+
+        if (loop.stage === "awaiting_approval") {
+            setState(
+                "Awaiting your approval",
+                "AI prepared the commerce decision. Nothing will be paid without your approval.",
+                "active"
+            );
+            activatePipeline(pipelineApproval);
+        } else if (loop.stage === "ready_for_execution") {
+            setState(
+                "Ready for payment",
+                "Your approval was received. Payment execution is still explicitly gated.",
+                "active"
+            );
+            activatePipeline(pipelinePayment);
+        } else if (loop.stage === "payment_pending") {
+            setState(
+                "Payment pending",
+                "Razorpay order created. Complete payment to continue.",
+                "active"
+            );
+            markPipelineComplete(pipelineApproval);
+            activatePipeline(pipelinePayment);
+        } else if (loop.stage === "payment_verified") {
+            setState(
+                "Payment verified",
+                "Payment was verified by the backend.",
+                "success"
+            );
+            markPipelineComplete(pipelineApproval);
+            markPipelineComplete(pipelinePayment);
+        }
+    } catch (error) {
+        console.warn("Commerce loop refresh failed:", error);
+    }
+}
+
 async function sendMessage() {
 
     if (isLoading) {
@@ -225,6 +282,8 @@ async function sendMessage() {
 
         currentProduct =
             data.recommendations[0];
+
+        await refreshCommerceLoop();
 
 
         activatePipeline(pipelinePolicy);
