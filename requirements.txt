@@ -3,6 +3,6 @@ pydantic
 razorpay
 python-dotenv
 uvicorn
-httpx2
+httpx
 
 pytest
