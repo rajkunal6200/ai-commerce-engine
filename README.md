@@ -2,6 +2,14 @@
 
 > **Agentic commerce with deterministic payment safety, human authorization, and auditable AI decisions.**
 
+## 🚀 Live Demo
+
+👉 **[Open AI Commerce Engine — Live Demo](https://ai-commerce-engine-frontend.onrender.com)**
+
+**Backend API:**
+
+👉 **[AI Commerce Engine Backend](https://ai-commerce-engine-14uf.onrender.com)**
+
 ## Overview
 
 AI Commerce Engine is a secure, conversational commerce system that turns natural-language shopping requests into controlled, auditable purchase workflows.
