@@ -1,0 +1,8 @@
+{
+  "name": "AI Commerce Engine",
+  "description": "Autonomous bounded shopping agent with product discovery, approval flow, and payment verification",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
