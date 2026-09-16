@@ -4,6 +4,16 @@ import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import {
+  getOrCreateMerchant,
+  updateMerchantSettings,
+  getMerchantProducts,
+  saveOrderRecord,
+  getMerchantOrders,
+  logPolicyAudit,
+  saveConversation
+} from "./src/db/queries.ts";
+import { requireAuth, AuthRequest } from "./src/middleware/auth.ts";
 
 dotenv.config();
 
@@ -2169,6 +2179,26 @@ app.post("/payment/verify", (req: Request, res: Response) => {
     saveIntents();
     saveAuditLogs();
 
+    // Startup-Ready: Real PostgreSQL Cloud SQL persistent order record
+    const targetOrder = stored.payment;
+    saveOrderRecord({
+      orderId: targetOrder.order_id || `ORD_${intentId}`,
+      merchantUid: activeStoreConfig.store_id || "merchant_default",
+      customerEmail: (stored.intent as any)?.customer_email || "customer@commerce.ai",
+      channel: "web",
+      itemId: stored.intent.purpose || "ITEM",
+      itemName: stored.intent.purpose || "Selected Product / Bundle",
+      amount: Number(targetOrder.amount || stored.intent.max_amount),
+      currency: targetOrder.currency || "INR",
+      status: "PAID",
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature || "verified",
+      decisionProofHash: (stored as any).decision_proof_hash || null,
+      intentContract: stored.intent as any,
+      paymentVerification: stored.payment as any,
+    }).catch(err => console.error("Cloud SQL async order logging non-fatal error:", err));
+
     res.json({
       intent_id: intentId,
       status: "payment_verified",
@@ -2450,6 +2480,79 @@ app.post("/api/store/sync-shopify", (req: Request, res: Response) => {
 });
 
 // ============================================================
+// STARTUP-READY REAL POSTGRESQL & MULTI-TENANT CLOUD SQL APIS
+// ============================================================
+
+// Sync or fetch merchant profile from Cloud SQL
+app.get("/api/db/merchant", async (req: Request, res: Response) => {
+  try {
+    const uid = (req.query.uid as string) || "merchant_default";
+    const email = (req.query.email as string) || "merchant@universal-journey.app";
+    const merchant = await getOrCreateMerchant(uid, email, activeStoreConfig.store_name);
+    const dbOrders = await getMerchantOrders(uid);
+    res.json({
+      status: "CONNECTED",
+      database: "Cloud SQL PostgreSQL (asia-southeast1)",
+      merchant,
+      stored_orders_count: dbOrders.length,
+      recent_orders: dbOrders.slice(0, 10)
+    });
+  } catch (error: any) {
+    console.error("Failed to query Cloud SQL merchant:", error);
+    res.status(500).json({ error: "Cloud SQL query failed", details: error.message });
+  }
+});
+
+// Real WhatsApp Cloud API Webhook Listener (Meta Graph API Standard)
+app.get("/api/channels/whatsapp", (req: Request, res: Response) => {
+  // Meta webhook verification challenge
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "commerce_ai_secure_verify_token";
+
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    console.log("WhatsApp Webhook verified successfully");
+    res.status(200).send(challenge);
+  } else {
+    res.status(403).json({ error: "Verification token mismatch" });
+  }
+});
+
+app.post("/api/channels/whatsapp", async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    // Log incoming Meta WhatsApp message payload
+    const entry = body?.entry?.[0];
+    const changes = entry?.changes?.[0];
+    const message = changes?.value?.messages?.[0];
+
+    if (message) {
+      const from = message.from; // Phone number
+      const text = message.text?.body || "";
+
+      // Save conversation state into Cloud SQL
+      await saveConversation({
+        sessionId: `wa_${from}`,
+        merchantUid: activeStoreConfig.store_id || "merchant_default",
+        customerIdentity: `+${from}`,
+        channel: "whatsapp",
+        messages: [{ sender: "customer", text, timestamp: new Date().toISOString() }],
+        currentState: { last_message: text, channel: "whatsapp" }
+      });
+
+      console.log(`[WhatsApp Inbound from +${from}]: "${text}"`);
+    }
+
+    res.status(200).json({ status: "RECEIVED" });
+  } catch (err: any) {
+    console.error("WhatsApp webhook processing error:", err);
+    res.status(500).json({ error: "Failed to process WhatsApp message" });
+  }
+});
+
+// ============================================================
 // AUTONOMOUS COMMERCE ORCHESTRATOR
 // ============================================================
 
@@ -2490,6 +2593,19 @@ export function logSecurityEventToPersistence(
   };
   currentLogs.push(record);
   atomicWriteJson(PERSISTENCE_LOGS_FILE, currentLogs);
+
+  // Startup-Ready: Asynchronously mirror all policy audits into Cloud SQL
+  logPolicyAudit({
+    merchantUid: activeStoreConfig.store_id || "merchant_default",
+    sessionId: buyerId,
+    action: eventType,
+    requestedPrice: details.input_valuation != null ? Number(details.input_valuation) : null,
+    floorPrice: details.current_floor != null ? Number(details.current_floor) : null,
+    finalPrice: details.final_price_inr != null ? Number(details.final_price_inr) : null,
+    hashProof: details.decision_proof_hash || null,
+    signatures: details.signatures || null,
+  }).catch(err => console.error("Cloud SQL audit mirror non-fatal error:", err));
+
   return record;
 }
 

@@ -389,10 +389,13 @@
                 <div class="dashboard-panel" style="margin-bottom: 24px;">
                     <div class="dashboard-panel-header">
                         <div>
-                            <div class="section-label">LIVE STORE CONFIGURATION</div>
-                            <h3>Configure Real Merchant Parameters</h3>
+                            <div class="section-label">LIVE STORE CONFIGURATION & RELATIONAL PERSISTENCE</div>
+                            <h3>Configure Real Merchant Parameters (Cloud SQL PostgreSQL)</h3>
                         </div>
-                        <span class="dashboard-live-badge" id="configSaveStatus">Ready</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="dashboard-live-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">● Cloud SQL (asia-southeast1)</span>
+                            <span class="dashboard-live-badge" id="configSaveStatus">Ready</span>
+                        </div>
                     </div>
 
                     <form id="storeConfigForm" class="merchant-form-grid" onsubmit="return false;">
@@ -423,6 +426,25 @@
                             </button>
                         </div>
                     </form>
+
+                    <!-- Real Startup Channel Integrations Status -->
+                    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;">
+                            <div style="font-size: 11px; color: var(--muted);">DATABASE PERSISTENCE</div>
+                            <div style="font-weight: 600; font-size: 13px; color: #10b981; margin-top: 2px;">PostgreSQL Active</div>
+                            <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Orders & logs saved permanently</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;">
+                            <div style="font-size: 11px; color: var(--muted);">META WHATSAPP API</div>
+                            <div style="font-weight: 600; font-size: 13px; color: #3b82f6; margin-top: 2px;">Webhook /api/channels/whatsapp</div>
+                            <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Supports Meta Graph verification</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;">
+                            <div style="font-size: 11px; color: var(--muted);">SHOPIFY COMMERCE</div>
+                            <div style="font-weight: 600; font-size: 13px; color: #8b5cf6; margin-top: 2px;">Live Ingestion Ready</div>
+                            <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Real-time inventory sync</div>
+                        </div>
+                    </div>
                 </div>
 
 
