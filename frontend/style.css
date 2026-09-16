@@ -1839,3 +1839,114 @@ textarea {
     }
 
 }
+
+/* =========================================================
+   STARTUP-GRADE MERCHANT STORE CONNECTOR & CHANNELS
+========================================================= */
+
+.store-connection-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-2);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.store-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.store-badge {
+    padding: 4px 10px;
+    background: rgba(156, 255, 91, 0.12);
+    border: 1px solid rgba(156, 255, 91, 0.3);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.store-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.channel-selector-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.channel-btn {
+    padding: 5px 12px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.channel-btn.active {
+    background: rgba(156, 255, 91, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(156, 255, 91, 0.3);
+}
+
+.channel-btn:hover:not(.active) {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.merchant-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.merchant-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.merchant-input-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.merchant-input {
+    background: var(--panel-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.merchant-input:focus {
+    border-color: var(--accent);
+}

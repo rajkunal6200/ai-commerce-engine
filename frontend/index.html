@@ -92,7 +92,7 @@
                     </strong>
 
                     <span>
-                        Every purchase requires approval.
+                        Financial Firewall Floor: ₹4,500.00 INR. Every purchase requires approval.
                     </span>
 
                 </div>
@@ -104,7 +104,7 @@
 
                 <span class="status-dot"></span>
 
-                AI Engine Online
+                Orchestrator Engine Online
 
             </div>
 
@@ -124,22 +124,36 @@
                 <div>
 
                     <div class="eyebrow">
-                        AI COMMERCE ENGINE
+                        ENTERPRISE WORKSPACE STUDIO
                     </div>
 
                     <h1>
-                        Your intelligent
-                        <span>shopping agent.</span>
+                        Curated Workspace
+                        <span>Solutions.</span>
                     </h1>
 
                 </div>
 
 
-                <div class="connection-status">
+                <div class="connection-status" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
 
-                    <span class="status-dot"></span>
+                    <div class="channel-selector-group" id="channelSelector">
+                        <button class="channel-btn active" id="channelStorefront" type="button" title="Test Web Storefront Concierge">
+                            🌐 Storefront
+                        </button>
+                        <button class="channel-btn" id="channelWhatsApp" type="button" title="Test WhatsApp Business AI Channel">
+                            💬 WhatsApp
+                        </button>
+                    </div>
 
-                    System operational
+                    <span id="headerFloorBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(255, 179, 71, 0.12); border: 1px solid rgba(255, 179, 71, 0.3); border-radius: 999px; font-size: 11px; font-weight: 600; color: #fbd38d;">
+                        ✨ Minimum Suite Tier: ₹4,500 INR
+                    </span>
+
+                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(156, 255, 91, 0.12); border: 1px solid rgba(156, 255, 91, 0.3); border-radius: 999px; font-size: 11px; font-weight: 600; color: #9cff5b;">
+                        <span class="status-dot"></span>
+                        Concierge Online
+                    </span>
 
                 </div>
 
@@ -162,20 +176,17 @@
                     id="welcomeScreen"
                 >
 
-                    <div class="welcome-badge">
-                        ✦ AI-powered commerce
+                    <div class="welcome-badge" style="background: rgba(156, 255, 91, 0.12); border-color: rgba(156, 255, 91, 0.3); color: #9cff5b;">
+                        ✦ AI Workspace Concierge
                     </div>
 
                     <h2>
-                        What are you
-                        <span>looking for?</span>
+                        Design your ideal
+                        <span>workspace.</span>
                     </h2>
 
-                    <p>
-                        Tell me what you need in natural language.
-                        I'll understand your requirements, find the
-                        best match, and keep every purchase under
-                        your control.
+                    <p style="color: #94a3b8; font-size: 14px; max-width: 580px; margin: 0 auto 24px auto; line-height: 1.6;">
+                        Welcome to our enterprise studio. Tell me about your workflow, preferred peripherals, or productivity targets, and I will configure the ideal curated equipment suite for you.
                     </p>
 
 
@@ -186,19 +197,19 @@
                         <button
                             class="suggestion-card"
                             type="button"
-                            data-message="I need a wireless mouse for productivity under ₹3,000."
+                            data-message="I am looking for productivity accessories under ₹3,000."
                         >
 
                             <span class="suggestion-icon">
-                                🖱️
+                                ✨
                             </span>
 
                             <span>
-                                Wireless mouse
+                                Inquire about Accessories (&lt; ₹4,500)
                             </span>
 
                             <small>
-                                Under ₹3,000
+                                View our curated workspace tiers
                             </small>
 
                         </button>
@@ -207,7 +218,7 @@
                         <button
                             class="suggestion-card"
                             type="button"
-                            data-message="I need wireless headphones for work under ₹5,000."
+                            data-message="I would like to purchase the Work & Focus Audio Bundle for ₹6,500."
                         >
 
                             <span class="suggestion-icon">
@@ -215,11 +226,11 @@
                             </span>
 
                             <span>
-                                Work headphones
+                                Work &amp; Focus Audio Bundle
                             </span>
 
                             <small>
-                                Under ₹5,000
+                                Complete Suite: ₹6,500 INR
                             </small>
 
                         </button>
@@ -228,7 +239,7 @@
                         <button
                             class="suggestion-card"
                             type="button"
-                            data-message="I need a laptop for development under ₹50,000."
+                            data-message="I would like to purchase the Developer Complete Suite for ₹51,500."
                         >
 
                             <span class="suggestion-icon">
@@ -236,11 +247,11 @@
                             </span>
 
                             <span>
-                                Developer laptop
+                                Developer Complete Suite
                             </span>
 
                             <small>
-                                Under ₹50,000
+                                Complete Suite: ₹51,500 INR
                             </small>
 
                         </button>
@@ -322,29 +333,96 @@
 
                     <div>
                         <div class="eyebrow">
-                            MERCHANT CONTROL
+                            MERCHANT CONTROL & CONNECTORS
                         </div>
 
                         <h2>
-                            Revenue
+                            Store & Revenue
                             <span>intelligence.</span>
                         </h2>
 
                         <p>
-                            Monitor verified commerce activity,
-                            payment outcomes, and actionable
-                            cross-sell opportunities.
+                            Connect real Shopify/WooCommerce stores, adjust the financial firewall policy floor, and monitor verified autonomous revenue.
                         </p>
                     </div>
 
-                    <button
-                        class="button secondary dashboard-refresh"
-                        id="dashboardRefreshButton"
-                        type="button"
-                    >
-                        ↻ Refresh
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button
+                            class="button primary"
+                            id="syncShopifyButton"
+                            type="button"
+                        >
+                            ⚡ Sync Shopify Store
+                        </button>
+                        <button
+                            class="button secondary dashboard-refresh"
+                            id="dashboardRefreshButton"
+                            type="button"
+                        >
+                            ↻ Refresh
+                        </button>
+                    </div>
 
+                </div>
+
+                <!-- Real Store Connector Panel -->
+                <div class="store-connection-bar">
+                    <div class="store-info">
+                        <div style="font-size: 24px;">🏬</div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong id="storeConnectorName" style="font-size: 15px; color: var(--text);">Workspace & Audio Tech</strong>
+                                <span class="store-badge" id="storeConnectorPlatform">SHOPIFY LIVE</span>
+                            </div>
+                            <span id="storeConnectorDomain" style="font-size: 12px; color: var(--muted);">https://shop.workspacetech.in</span>
+                        </div>
+                    </div>
+                    <div class="store-actions">
+                        <div style="text-align: right; margin-right: 12px;">
+                            <span style="font-size: 11px; color: var(--muted); display: block;">Dynamic Policy Floor</span>
+                            <strong id="storeCurrentFloor" style="font-size: 14px; color: var(--accent);">₹4,500.00 INR</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Store & Pricing Floor Configuration -->
+                <div class="dashboard-panel" style="margin-bottom: 24px;">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <div class="section-label">LIVE STORE CONFIGURATION</div>
+                            <h3>Configure Real Merchant Parameters</h3>
+                        </div>
+                        <span class="dashboard-live-badge" id="configSaveStatus">Ready</span>
+                    </div>
+
+                    <form id="storeConfigForm" class="merchant-form-grid" onsubmit="return false;">
+                        <div class="merchant-input-group">
+                            <label for="inputStoreName">Store Name</label>
+                            <input class="merchant-input" id="inputStoreName" type="text" value="Workspace & Audio Tech" placeholder="e.g. My Brand Store" />
+                        </div>
+                        <div class="merchant-input-group">
+                            <label for="inputStoreDomain">Store Domain / API URL</label>
+                            <input class="merchant-input" id="inputStoreDomain" type="text" value="https://shop.workspacetech.in" placeholder="e.g. https://yourstore.myshopify.com" />
+                        </div>
+                        <div class="merchant-input-group">
+                            <label for="inputPlatform">Platform</label>
+                            <select class="merchant-input" id="inputPlatform">
+                                <option value="shopify">Shopify Storefront</option>
+                                <option value="woocommerce">WooCommerce REST API</option>
+                                <option value="custom_catalog">Custom Cloud Catalog</option>
+                            </select>
+                        </div>
+                        <div class="merchant-input-group">
+                            <label for="inputFloorPrice">Policy Floor (INR)</label>
+                            <input class="merchant-input" id="inputFloorPrice" type="number" step="100" min="500" value="4500" placeholder="e.g. 4500" />
+                        </div>
+                        <div class="merchant-input-group" style="justify-content: flex-end;">
+                            <label>&nbsp;</label>
+                            <button class="button primary" id="saveStoreConfigBtn" type="button" style="padding: 10px 16px;">
+                                Save & Apply Policy
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
 
@@ -779,6 +857,50 @@
 
             </div>
 
+            <!-- Financial Firewall Status & Matrix -->
+            <div class="control-section" style="margin-top: 14px;">
+                <div class="section-label" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>FINANCIAL FIREWALL</span>
+                    <span style="background: rgba(255, 107, 107, 0.15); color: #ff8585; border: 1px solid rgba(255, 107, 107, 0.3); padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 700;">FLOOR: ₹4,500</span>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; font-size: 12px; margin-top: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: #94a3b8;">Floor Interception:</span>
+                        <span style="color: #ff8585; font-weight: 600;">&lt; ₹4,500.00 INR</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: #94a3b8;">Text Suppression:</span>
+                        <span style="color: #9cff5b; font-weight: 600;">Enforced (Zero UI)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #94a3b8;">Tool Route:</span>
+                        <code style="color: #93c5fd; font-size: 11px;">generate_secure_checkout</code>
+                    </div>
+
+                    <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px; margin-top: 8px;">
+                        <div style="font-size: 10px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.05em; margin-bottom: 6px;">
+                            AUTHORIZED ASSET PAYLOAD:
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                            <span>• Work &amp; Focus Audio</span>
+                            <strong style="color: #9cff5b;">₹6,500.00</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                            <span>• Developer Complete</span>
+                            <strong style="color: #9cff5b;">₹51,500.00</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Structured Tool Stream Output -->
+            <div class="control-section" style="margin-top: 14px;">
+                <div class="section-label">
+                    STRUCTURED DATA STREAM
+                </div>
+                <pre id="liveToolStream" style="background: #080b12; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; color: #a5b4fc; max-height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin: 8px 0 0 0;">// Awaiting orchestrator event...</pre>
+            </div>
 
             <!-- Trust -->
 
