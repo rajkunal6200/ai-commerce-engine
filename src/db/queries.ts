@@ -47,6 +47,50 @@ export async function getMerchantProducts(merchantUid: string) {
   }
 }
 
+// Upsert a product in the catalog
+export async function upsertProduct(prodData: typeof products.$inferInsert) {
+  try {
+    const existing = await db.select().from(products)
+      .where(eq(products.productId, prodData.productId))
+      .limit(1);
+
+    if (existing.length > 0) {
+      const updated = await db.update(products)
+        .set({
+          name: prodData.name,
+          description: prodData.description,
+          category: prodData.category,
+          price: prodData.price,
+          currency: prodData.currency || 'INR',
+          stock: prodData.stock,
+          tags: prodData.tags
+        })
+        .where(eq(products.productId, prodData.productId))
+        .returning();
+      return updated[0];
+    } else {
+      const inserted = await db.insert(products).values(prodData).returning();
+      return inserted[0];
+    }
+  } catch (error) {
+    console.error('Error in upsertProduct:', error);
+    throw new Error('Failed to upsert product', { cause: error });
+  }
+}
+
+// Delete a product from the catalog
+export async function deleteProduct(productId: string) {
+  try {
+    const deleted = await db.delete(products)
+      .where(eq(products.productId, productId))
+      .returning();
+    return deleted[0];
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    throw new Error('Failed to delete product', { cause: error });
+  }
+}
+
 // Save or update an order
 export async function saveOrderRecord(orderData: typeof orders.$inferInsert) {
   try {
@@ -71,6 +115,19 @@ export async function saveOrderRecord(orderData: typeof orders.$inferInsert) {
   }
 }
 
+// Delete an order from the database
+export async function deleteOrderRecord(orderId: string) {
+  try {
+    const deleted = await db.delete(orders)
+      .where(eq(orders.orderId, orderId))
+      .returning();
+    return deleted[0];
+  } catch (error) {
+    console.error('Error deleting order record:', error);
+    return null;
+  }
+}
+
 // Fetch merchant orders
 export async function getMerchantOrders(merchantUid: string) {
   try {
@@ -90,6 +147,20 @@ export async function logPolicyAudit(auditData: typeof policyAuditLogs.$inferIns
     console.error('Error logging policy audit:', error);
     // Non-blocking log write
     return null;
+  }
+}
+
+// Fetch policy audits
+export async function getPolicyAudits(merchantUid: string, limitCount = 50) {
+  try {
+    return await db.select()
+      .from(policyAuditLogs)
+      .where(eq(policyAuditLogs.merchantUid, merchantUid))
+      .orderBy(desc(policyAuditLogs.createdAt))
+      .limit(limitCount);
+  } catch (error) {
+    console.error('Error fetching policy audits:', error);
+    return [];
   }
 }
 

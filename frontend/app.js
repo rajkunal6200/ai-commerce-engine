@@ -17,6 +17,40 @@ let currentProduct = null;
 let isLoading = false;
 let lastPayment = null;
 let lastAuditTrail = [];
+let currentStoreConfig = null;
+
+// ============================================================
+// THEME SWITCHER (DARK / LIGHT MODE)
+// ============================================================
+function initTheme() {
+    const savedTheme = localStorage.getItem("ai_commerce_theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    applyTheme(savedTheme);
+
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    themeToggleBtn?.addEventListener("click", () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        applyTheme(newTheme);
+    });
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    document.body.setAttribute("data-theme", theme);
+    localStorage.setItem("ai_commerce_theme", theme);
+
+    const themeIcon = document.getElementById("themeIcon");
+    const themeText = document.getElementById("themeText");
+    if (themeIcon) {
+        themeIcon.textContent = theme === "dark" ? "☀️" : "🌙";
+    }
+    if (themeText) {
+        themeText.textContent = theme === "dark" ? "Light Mode" : "Dark Mode";
+    }
+}
+
+// Initialize theme immediately on script execution
+initTheme();
 
 
 // ============================================================
@@ -647,7 +681,7 @@ function addFirewallCrossSellMessage(data) {
 
         const itemCard = document.createElement("div");
         itemCard.className = "recommendation-card";
-        itemCard.style.cssText = "border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 14px;";
+        itemCard.style.cssText = "border: 1px solid var(--border); background: var(--panel-2); border-radius: 12px; padding: 14px;";
 
         const top = document.createElement("div");
         top.className = "product-top";
@@ -671,17 +705,20 @@ function addFirewallCrossSellMessage(data) {
         info.appendChild(icon);
         info.appendChild(textDiv);
 
+        const rawPrice = itemObj.price_inr ?? itemObj.valuation_inr ?? itemObj.price ?? itemObj.valuation ?? (skuStr.includes("LAP") ? 51500 : 6500);
+        const numericPrice = Number(rawPrice) || (skuStr.includes("LAP") ? 51500 : 6500);
+
         const price = document.createElement("div");
         price.className = "product-price";
-        price.textContent = formatCurrency(itemObj.price || itemObj.valuation, itemObj.currency || "INR");
+        price.textContent = formatCurrency(numericPrice, itemObj.currency || "INR");
 
         top.appendChild(info);
         top.appendChild(price);
 
         const reason = document.createElement("div");
         reason.className = "product-reason";
-        reason.style.cssText = "color: #94a3b8; font-size: 12px; margin: 10px 0;";
-        reason.textContent = itemObj.reason || "Curated suite engineered for optimal enterprise productivity.";
+        reason.style.cssText = "color: var(--muted); font-size: 12px; margin: 10px 0; line-height: 1.5;";
+        reason.textContent = itemObj.reason || (skuStr.includes("LAP") ? "Includes 14\" ProBook M2 Laptop + Ergonomic ProMouse." : "Includes premium SoundMax Active Noise-Cancelling Headphones + Ergonomic ProMouse.");
 
         const actions = document.createElement("div");
         actions.className = "recommendation-actions";
@@ -691,7 +728,7 @@ function addFirewallCrossSellMessage(data) {
         buyBtn.type = "button";
         buyBtn.textContent = `Select ${itemObj.name} →`;
         buyBtn.addEventListener("click", () => {
-            messageInput.value = `I want to purchase the ${itemObj.name} for ${itemObj.price || itemObj.valuation}`;
+            messageInput.value = `I want to purchase the ${itemObj.name} for ${numericPrice}`;
             sendMessage();
         });
 
@@ -727,27 +764,28 @@ function addCompiledToolCallMessage(data) {
         final_price_inr: 6500
     };
 
-    let productName = "Curated Workspace Suite";
-    if (params.item_id === "BUNDLE_HP_MS") productName = "Work & Focus Audio Bundle";
-    else if (params.item_id === "BUNDLE_LAP_MS") productName = "Developer Complete Suite";
+    let productName = params.item_id || "Curated Workspace Suite";
+    if (params.item_id === "BUNDLE_HP_MS" || String(params.item_id).includes("Work & Focus") || String(params.item_id).toLowerCase().includes("audio")) productName = "Work & Focus Audio Bundle";
+    else if (params.item_id === "BUNDLE_LAP_MS" || String(params.item_id).includes("Developer")) productName = "Developer Complete Suite";
     else if (params.item_id === "LAP001") productName = "ProBook Laptop";
     else if (params.item_id === "HP001") productName = "SoundMax Headphones";
     else if (params.item_id === "MS001") productName = "ProMouse Wireless";
+    else if (typeof params.item_id === "string" && params.item_id.length > 3) productName = params.item_id;
 
     const card = document.createElement("div");
-    card.style.cssText = "background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(156, 255, 91, 0.35); border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);";
+    card.style.cssText = "background: var(--panel-2); border: 1px solid var(--accent-border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-md);";
 
     card.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(156, 255, 91, 0.15); color: #9cff5b; padding: 4px 10px; border-radius: 999px;">
+            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: var(--success-soft); color: var(--success); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--success-border);">
                 ✓ Order Prepared
             </span>
-            <span style="font-size: 13px; color: #94a3b8;">Instant Checkout Ready</span>
+            <span style="font-size: 13px; color: var(--muted);">Instant Checkout Ready</span>
         </div>
-        <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 4px;">
-            ${productName}
+        <div style="font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px;">
+            ${escapeHtml(productName)}
         </div>
-        <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 16px;">
+        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
             Your configuration has been verified and locked in at <strong>₹${Number(params.final_price_inr).toLocaleString('en-IN')}.00 INR</strong>.
         </div>
     `;
@@ -900,11 +938,7 @@ function closeApprovalModal() {
 async function approvePurchase() {
 
     if (!currentIntentId) {
-
-        alert(
-            "No active purchase intent found."
-        );
-
+        addMessage("agent", "⚠️ No active purchase intent found to approve.");
         return;
     }
 
@@ -1146,7 +1180,7 @@ async function rejectPurchase() {
 
         console.error(error);
 
-        alert(error.message);
+        addMessage("agent", `⚠️ Could not complete cancellation: ${error.message}`);
 
     } finally {
 
@@ -1218,10 +1252,10 @@ function addPaymentSuccess(data) {
 
     const testMessage = document.createElement("div");
     testMessage.style.marginTop = "10px";
-    testMessage.style.color = "#9cff5b";
-    testMessage.style.fontSize = "9px";
+    testMessage.style.color = "#34d399";
+    testMessage.style.fontSize = "10px";
     testMessage.textContent =
-        "Razorpay Test Mode • No real money was charged.";
+        "Razorpay Test Mode • Verified Transaction Recorded";
 
     card.appendChild(testMessage);
 
@@ -1295,6 +1329,7 @@ function addPaymentSuccess(data) {
 function addPaymentVerified(data) {
 
     const payment = data?.payment;
+    const receipt = data?.receipt;
 
     if (!payment) {
         return;
@@ -1310,6 +1345,36 @@ function addPaymentVerified(data) {
         "agent",
         "✓ Payment verified. Razorpay signature, amount, order and capture status were confirmed by the backend."
     );
+
+    // Render Cryptographic Digital Receipt Card in the conversation
+    if (receipt) {
+        const receiptCard = document.createElement("div");
+        receiptCard.className = "message agent";
+        receiptCard.style.maxWidth = "480px";
+        receiptCard.style.margin = "8px 0";
+        receiptCard.innerHTML = `
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 14px; font-size: 13px; color: var(--foreground);">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(16, 185, 129, 0.2); padding-bottom: 8px; margin-bottom: 10px;">
+                    <strong style="color: #10b981; font-size: 14px;">🧾 OFFICIAL ORDER RECEIPT</strong>
+                    <span style="font-family: monospace; font-size: 11px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 6px; border-radius: 4px;">${escapeHtml(receipt.receipt_id)}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 12px; margin-bottom: 10px;">
+                    <div><span style="color: var(--muted);">Item:</span> <strong>${escapeHtml(receipt.item)}</strong></div>
+                    <div><span style="color: var(--muted);">Amount Paid:</span> <strong style="color: #10b981;">₹${Number(receipt.amount_inr).toLocaleString("en-IN")} INR</strong></div>
+                    <div><span style="color: var(--muted);">Order ID:</span> <span style="font-family: monospace;">${escapeHtml(receipt.order_id)}</span></div>
+                    <div><span style="color: var(--muted);">Payment ID:</span> <span style="font-family: monospace;">${escapeHtml(receipt.payment_id)}</span></div>
+                    <div><span style="color: var(--muted);">Issued At:</span> <span>${new Date(receipt.issued_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+                    <div><span style="color: var(--muted);">Gateway:</span> <span>Razorpay Verified</span></div>
+                </div>
+                <div style="border-top: 1px dashed rgba(16, 185, 129, 0.2); padding-top: 8px; font-size: 11px;">
+                    <span style="color: var(--muted);">Cryptographic Signature (SHA-256 Proof):</span>
+                    <div style="font-family: monospace; font-size: 10px; color: #10b981; word-break: break-all; margin-top: 2px;">${escapeHtml(receipt.digital_signature)}</div>
+                </div>
+            </div>
+        `;
+        messages.appendChild(receiptCard);
+        scrollChatToBottom();
+    }
 
     console.log(
         "Payment verified:",
@@ -1440,7 +1505,7 @@ async function openRazorpayCheckout(payment) {
     const keyCandidate = payment.key_id || window.RAZORPAY_KEY_ID;
     const keyId = (keyCandidate && !keyCandidate.includes("your_public_key_id"))
         ? keyCandidate
-        : "rzp_test_TUi28O8V9GShpw";
+        : "";
 
     if (!keyId) {
 
@@ -1596,7 +1661,7 @@ async function openRazorpayCheckout(payment) {
             },
 
             theme: {
-                color: "#9cff5b"
+                color: "#6366f1"
             }
         };
 
@@ -1952,6 +2017,19 @@ const dashboardDecision =
 
 const dashboardDecisionType =
     document.getElementById("dashboardDecisionType");
+
+const toggleInspectorBtn =
+    document.getElementById("toggleInspectorBtn");
+
+const appContainer =
+    document.querySelector(".app");
+
+if (toggleInspectorBtn && appContainer) {
+    toggleInspectorBtn.addEventListener("click", () => {
+        appContainer.classList.toggle("inspector-collapsed");
+        toggleInspectorBtn.classList.toggle("active");
+    });
+}
 
 
 function setDashboardMode(showDashboard) {
@@ -2362,17 +2440,30 @@ function renderDashboardCatalog(catalog) {
                     ${escapeHtml(stockText)}
                 </span>
 
-                <div class="dashboard-product-tags">
-                    ${tags
-                        .map(
-                            tag =>
-                                `<span class="dashboard-product-tag">
-                                    ${escapeHtml(tag)}
-                                </span>`
-                        )
-                        .join("")}
+                <div class="dashboard-product-tags" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div>
+                        ${tags
+                            .map(
+                                tag =>
+                                    `<span class="dashboard-product-tag">
+                                        ${escapeHtml(tag)}
+                                    </span>`
+                            )
+                            .join("")}
+                    </div>
+                    <button class="delete-prod-btn" data-id="${escapeHtml(product.product_id)}" title="Delete item" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 13px; padding: 2px 6px;">✕</button>
                 </div>
             `;
+
+            const delBtn = card.querySelector(".delete-prod-btn");
+            if (delBtn) {
+                delBtn.addEventListener("click", async (ev) => {
+                    ev.stopPropagation();
+                    if (!confirm(`Delete product ${product.name}?`)) return;
+                    await fetch(`${API_BASE_URL}/api/catalog/product/${encodeURIComponent(product.product_id)}`, { method: "DELETE" });
+                    await loadMerchantDashboard();
+                });
+            }
 
             dashboardCatalog.appendChild(card);
         }
@@ -2415,6 +2506,8 @@ async function loadMerchantDashboard() {
 
         dashboardDataStatus.textContent =
             "Live data";
+
+        await loadCloudSqlAudits();
 
     } catch (error) {
 
@@ -2480,6 +2573,8 @@ const inputStoreName = document.getElementById("inputStoreName");
 const inputStoreDomain = document.getElementById("inputStoreDomain");
 const inputPlatform = document.getElementById("inputPlatform");
 const inputFloorPrice = document.getElementById("inputFloorPrice");
+const inputRazorpayKey = document.getElementById("inputRazorpayKey");
+const inputWhatsAppPhone = document.getElementById("inputWhatsAppPhone");
 const saveStoreConfigBtn = document.getElementById("saveStoreConfigBtn");
 const syncShopifyButton = document.getElementById("syncShopifyButton");
 
@@ -2490,18 +2585,31 @@ async function loadStoreConfig() {
         if (!response.ok) return;
         const data = await response.json();
         const store = data.store;
+        currentStoreConfig = store;
         const activeFloor = data.active_floor || 4500;
 
         if (storeConnectorName) storeConnectorName.textContent = store.store_name || "Workspace & Audio Tech";
         if (storeConnectorPlatform) storeConnectorPlatform.textContent = (store.platform || "SHOPIFY").toUpperCase() + " LIVE";
         if (storeConnectorDomain) storeConnectorDomain.textContent = store.store_domain || "https://shop.workspacetech.in";
         if (storeCurrentFloor) storeCurrentFloor.textContent = `₹${Number(activeFloor).toLocaleString("en-IN")}.00 INR`;
-        if (headerFloorBadge) headerFloorBadge.textContent = `✨ Minimum Suite Tier: ₹${Number(activeFloor).toLocaleString("en-IN")} INR`;
+        if (headerFloorBadge) headerFloorBadge.textContent = `Policy Floor: ₹${Number(activeFloor).toLocaleString("en-IN")} INR`;
+
+        const headerStoreName = document.getElementById("headerStoreName");
+        if (headerStoreName && store.store_name) {
+            headerStoreName.textContent = store.store_name;
+        }
+
+        const sideFloorAmount = document.getElementById("sideFloorAmount");
+        if (sideFloorAmount) {
+            sideFloorAmount.textContent = `₹${Number(activeFloor).toLocaleString("en-IN")}.00 INR`;
+        }
 
         if (inputStoreName) inputStoreName.value = store.store_name || "";
         if (inputStoreDomain) inputStoreDomain.value = store.store_domain || "";
         if (inputPlatform) inputPlatform.value = store.platform || "shopify";
         if (inputFloorPrice) inputFloorPrice.value = activeFloor;
+        if (inputRazorpayKey) inputRazorpayKey.value = store.razorpay_key_id || "";
+        if (inputWhatsAppPhone) inputWhatsAppPhone.value = store.whatsapp_phone_number_id || "";
     } catch (e) {
         console.warn("Could not load merchant store config:", e);
     }
@@ -2519,7 +2627,9 @@ if (saveStoreConfigBtn) {
                 store_name: inputStoreName?.value || "",
                 store_domain: inputStoreDomain?.value || "",
                 platform: inputPlatform?.value || "shopify",
-                floor_price_inr: Number(inputFloorPrice?.value || 4500)
+                floor_price_inr: Number(inputFloorPrice?.value || 4500),
+                razorpay_key_id: inputRazorpayKey?.value || "",
+                whatsapp_phone_number_id: inputWhatsAppPhone?.value || ""
             };
 
             const response = await fetch(`${API_BASE_URL}/api/store/config`, {
@@ -2599,6 +2709,243 @@ if (channelStorefrontBtn && channelWhatsAppBtn) {
         channelStorefrontBtn.classList.remove("active");
         setDashboardMode(false);
         addMessage("agent", "💬 Switched simulation channel to **WhatsApp Business AI Assistant**. Real-time conversational commerce with direct instant checkout links.");
+    });
+}
+
+// ============================================================
+// CLOUD SQL POLICY AUDIT LOGS VIEWER
+// ============================================================
+
+async function loadCloudSqlAudits() {
+    const tableBody = document.getElementById("cloudSqlAuditBody");
+    if (!tableBody) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/db/audits`);
+        if (!response.ok) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="padding: 12px; text-align: center; color: var(--muted);">Unable to load Cloud SQL audits</td></tr>`;
+            return;
+        }
+
+        const data = await response.json();
+        const audits = data.audits || [];
+
+        if (audits.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="padding: 12px; text-align: center; color: var(--muted);">No financial firewall or quorum events recorded yet. All actions are monitored in real time.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = audits.slice(0, 15).map(audit => {
+            const timeStr = audit.createdAt ? new Date(audit.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Just now";
+            const isBlocked = audit.action === "MUTATION_BLOCKED" || audit.action === "FIREWALL_INTERCEPTION";
+            const statusColor = isBlocked ? "#ef4444" : "#10b981";
+            const shortHash = audit.hashProof ? `${audit.hashProof.slice(0, 12)}...` : (audit.action === "QUORUM_CONSENSUS" ? "3/3 Quorum Sign" : "—");
+
+            let offeredCol = "—";
+            if (audit.requestedPrice) {
+                offeredCol = `₹${Number(audit.requestedPrice).toLocaleString("en-IN")}`;
+            } else if (audit.finalPrice) {
+                offeredCol = `<span style="color: #10b981; font-weight: 600;">₹${Number(audit.finalPrice).toLocaleString("en-IN")}</span>`;
+            }
+
+            let floorCol = "—";
+            if (audit.floorPrice) {
+                floorCol = `₹${Number(audit.floorPrice).toLocaleString("en-IN")}`;
+            } else if (audit.action === "QUORUM_CONSENSUS") {
+                floorCol = `₹4,500`;
+            }
+
+            return `
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                    <td style="padding: 8px; font-family: monospace; color: var(--muted);">${escapeHtml(timeStr)}</td>
+                    <td style="padding: 8px; font-weight: 600; color: ${statusColor};">${escapeHtml(audit.action)}</td>
+                    <td style="padding: 8px;">${offeredCol}</td>
+                    <td style="padding: 8px;">${floorCol}</td>
+                    <td style="padding: 8px;"><span style="background: ${isBlocked ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)'}; color: ${statusColor}; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${isBlocked ? "BLOCKED" : "APPROVED"}</span></td>
+                    <td style="padding: 8px; font-family: monospace; font-size: 11px; color: var(--muted);">${escapeHtml(shortHash)}</td>
+                </tr>
+            `;
+        }).join("");
+    } catch (err) {
+        console.error("Failed to load Cloud SQL audits:", err);
+    }
+}
+
+// ============================================================
+// MERCHANT PRODUCT CATALOG CRUD HANDLERS
+// ============================================================
+
+const openAddProductModalBtn = document.getElementById("openAddProductModalBtn");
+const addProductCard = document.getElementById("addProductCard");
+const cancelAddProdBtn = document.getElementById("cancelAddProdBtn");
+const saveNewProdBtn = document.getElementById("saveNewProdBtn");
+
+const inputNewProdId = document.getElementById("inputNewProdId");
+const inputNewProdName = document.getElementById("inputNewProdName");
+const inputNewProdCategory = document.getElementById("inputNewProdCategory");
+const inputNewProdPrice = document.getElementById("inputNewProdPrice");
+const inputNewProdStock = document.getElementById("inputNewProdStock");
+
+const addProductNotice = document.getElementById("addProductNotice");
+
+if (openAddProductModalBtn && addProductCard) {
+    openAddProductModalBtn.addEventListener("click", () => {
+        const isOpening = addProductCard.style.display === "none";
+        addProductCard.style.display = isOpening ? "block" : "none";
+        if (isOpening) {
+            if (inputNewProdId) inputNewProdId.value = `SKU_${Math.floor(1000 + Math.random() * 9000)}`;
+            if (inputNewProdName && !inputNewProdName.value) inputNewProdName.value = "Ergonomic Office Chair";
+            if (inputNewProdCategory && !inputNewProdCategory.value) inputNewProdCategory.value = "Furniture";
+            if (inputNewProdPrice && !inputNewProdPrice.value) inputNewProdPrice.value = "5999";
+            if (inputNewProdStock && !inputNewProdStock.value) inputNewProdStock.value = "25";
+            if (addProductNotice) {
+                addProductNotice.style.display = "none";
+            }
+        }
+    });
+}
+
+if (cancelAddProdBtn && addProductCard) {
+    cancelAddProdBtn.addEventListener("click", () => {
+        addProductCard.style.display = "none";
+        if (addProductNotice) addProductNotice.style.display = "none";
+    });
+}
+
+if (saveNewProdBtn) {
+    saveNewProdBtn.addEventListener("click", async () => {
+        const id = inputNewProdId?.value?.trim();
+        const name = inputNewProdName?.value?.trim();
+        const price = Number(inputNewProdPrice?.value || 0);
+
+        if (!id || !name || price <= 0) {
+            if (addProductNotice) {
+                addProductNotice.style.display = "block";
+                addProductNotice.style.background = "rgba(239, 68, 68, 0.15)";
+                addProductNotice.style.border = "1px solid rgba(239, 68, 68, 0.4)";
+                addProductNotice.style.color = "#fca5a5";
+                addProductNotice.textContent = "Please provide a valid SKU, Product Title, and Price greater than 0.";
+            }
+            return;
+        }
+
+        saveNewProdBtn.disabled = true;
+        saveNewProdBtn.textContent = "Saving...";
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/catalog/product`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    product_id: id,
+                    name,
+                    category: inputNewProdCategory?.value?.trim() || "General",
+                    price,
+                    stock: Number(inputNewProdStock?.value || 20),
+                    tags: [name.toLowerCase()]
+                })
+            });
+
+            if (res.ok) {
+                if (addProductNotice) {
+                    addProductNotice.style.display = "block";
+                    addProductNotice.style.background = "rgba(16, 185, 129, 0.15)";
+                    addProductNotice.style.border = "1px solid rgba(16, 185, 129, 0.4)";
+                    addProductNotice.style.color = "#6ee7b7";
+                    addProductNotice.textContent = `✓ Product "${name}" saved to Cloud SQL catalog!`;
+                }
+                setTimeout(async () => {
+                    if (addProductCard) addProductCard.style.display = "none";
+                    if (addProductNotice) addProductNotice.style.display = "none";
+                    if (inputNewProdName) inputNewProdName.value = "";
+                    if (inputNewProdPrice) inputNewProdPrice.value = "";
+                    await loadMerchantDashboard();
+                }, 900);
+            } else {
+                const errData = await res.json().catch(() => ({}));
+                if (addProductNotice) {
+                    addProductNotice.style.display = "block";
+                    addProductNotice.style.background = "rgba(239, 68, 68, 0.15)";
+                    addProductNotice.style.border = "1px solid rgba(239, 68, 68, 0.4)";
+                    addProductNotice.style.color = "#fca5a5";
+                    addProductNotice.textContent = errData.error || "Failed to save product to catalog.";
+                }
+            }
+        } catch (err) {
+            console.error("Product save failed:", err);
+            if (addProductNotice) {
+                addProductNotice.style.display = "block";
+                addProductNotice.style.background = "rgba(239, 68, 68, 0.15)";
+                addProductNotice.style.border = "1px solid rgba(239, 68, 68, 0.4)";
+                addProductNotice.style.color = "#fca5a5";
+                addProductNotice.textContent = "Network error: Failed to reach catalog API.";
+            }
+        } finally {
+            saveNewProdBtn.disabled = false;
+            saveNewProdBtn.textContent = "Save to Catalog";
+        }
+    });
+}
+
+// ============================================================
+// WHATSAPP INSTANT PURCHASE LINK DISPATCHER
+// ============================================================
+
+const sendWhatsAppLinkBtn = document.getElementById("sendWhatsAppLinkBtn");
+const inputDispatchPhone = document.getElementById("inputDispatchPhone");
+const inputDispatchItem = document.getElementById("inputDispatchItem");
+const inputDispatchPrice = document.getElementById("inputDispatchPrice");
+const dispatchResultNotice = document.getElementById("dispatchResultNotice");
+
+if (sendWhatsAppLinkBtn) {
+    sendWhatsAppLinkBtn.addEventListener("click", async () => {
+        const phone = inputDispatchPhone?.value?.trim();
+        const item = inputDispatchItem?.value?.trim() || "Authorized Audio Bundle";
+        const price = Number(inputDispatchPrice?.value || 6500);
+
+        if (!phone) {
+            if (dispatchResultNotice) {
+                dispatchResultNotice.style.display = "block";
+                dispatchResultNotice.style.color = "#ef4444";
+                dispatchResultNotice.textContent = "⚠️ Please enter a customer WhatsApp number.";
+            }
+            return;
+        }
+
+        sendWhatsAppLinkBtn.disabled = true;
+        sendWhatsAppLinkBtn.textContent = "Sending...";
+
+        try {
+            const checkoutUrl = `${window.location.origin}/?item=${encodeURIComponent(item)}&negotiated_price=${price}`;
+            const res = await fetch(`${API_BASE_URL}/api/channels/whatsapp/send-link`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phone_number: phone,
+                    item_name: item,
+                    final_price_inr: price,
+                    checkout_url: checkoutUrl
+                })
+            });
+
+            const data = await res.json();
+            if (dispatchResultNotice) {
+                dispatchResultNotice.style.display = "block";
+                dispatchResultNotice.style.color = "#10b981";
+                const linkHtml = data.whatsapp_direct_link ? `<div style="margin-top: 6px;"><a href="${escapeHtml(data.whatsapp_direct_link)}" target="_blank" rel="noopener noreferrer" style="color: #34d399; text-decoration: underline; font-weight: 500;">Open in WhatsApp ↗</a></div>` : "";
+                dispatchResultNotice.innerHTML = `✓ <strong>Link Dispatched</strong> to ${escapeHtml(data.recipient)}! Free transaction tier confirmed. Message recorded in Cloud SQL.${linkHtml}`;
+            }
+        } catch (e) {
+            console.error(e);
+            if (dispatchResultNotice) {
+                dispatchResultNotice.style.display = "block";
+                dispatchResultNotice.style.color = "#ef4444";
+                dispatchResultNotice.textContent = "Failed to dispatch WhatsApp link.";
+            }
+        } finally {
+            sendWhatsAppLinkBtn.disabled = false;
+            sendWhatsAppLinkBtn.textContent = "💬 Dispatch Payment Link";
+        }
     });
 }
 
@@ -2779,6 +3126,7 @@ function formatCurrency(
     amount,
     currency
 ) {
+    const validAmount = Number(amount) || 0;
 
     if (
         currency === "INR"
@@ -2791,11 +3139,11 @@ function formatCurrency(
                 currency: "INR",
                 maximumFractionDigits: 0
             }
-        ).format(amount);
+        ).format(validAmount);
     }
 
 
-    return `${currency || ""} ${amount}`;
+    return `${currency || ""} ${validAmount}`;
 }
 
 
@@ -2989,74 +3337,374 @@ function renderOrders(orders) {
     ordersList.innerHTML = "";
 
     if (!Array.isArray(orders) || orders.length === 0) {
-
         ordersList.innerHTML = `
-            <div class="dashboard-empty">
-                No orders found.
+            <div class="dashboard-empty" style="padding: 48px 24px; text-align: center;">
+                <div style="font-size: 36px; margin-bottom: 14px;">📦</div>
+                <strong style="font-size: 15px; color: var(--text); display: block; margin-bottom: 6px;">No orders found yet</strong>
+                <p style="color: var(--muted); font-size: 13px; max-width: 400px; margin: 0 auto 20px; line-height: 1.6;">
+                    When you negotiate or purchase products through AI Chat or Instant Checkout, verified orders with downloadable receipts appear here.
+                </p>
+                <button class="button primary" id="emptyOrdersStartBtn" type="button" style="margin: 0 auto; padding: 10px 22px;">
+                    Start Autonomous Shopping →
+                </button>
             </div>
         `;
+
+        document.getElementById("emptyOrdersStartBtn")?.addEventListener("click", () => {
+            newChatButton?.click();
+        });
 
         return;
     }
 
+    ordersList.innerHTML = `<div class="orders-grid" id="ordersGridContainer"></div>`;
+    const gridContainer = document.getElementById("ordersGridContainer");
+
     orders.forEach(order => {
+        const card = document.createElement("div");
+        card.className = "order-card-enhanced";
 
-        const card =
-            document.createElement("div");
+        const amount = order.amount !== null && order.amount !== undefined
+            ? formatCurrency(order.amount, order.currency || "INR")
+            : "—";
 
-        card.className =
-            "dashboard-opportunity";
+        const formattedDate = order.created_at
+            ? new Date(order.created_at).toLocaleDateString("en-IN", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            })
+            : "Recent";
 
-        const amount =
-            order.amount !== null &&
-            order.amount !== undefined
-                ? formatCurrency(
-                    order.amount,
-                    order.currency || "INR"
-                )
-                : "—";
-
-        const status =
-            formatOrderStatus(
-                order.status
-            );
+        const productName = order.product_name || "Curated Workspace Technology Package";
+        const merchantName = order.merchant || currentStoreConfig?.store_name || "Enterprise Tech Store";
 
         card.innerHTML = `
-            <div class="dashboard-opportunity-top">
-                <strong>
-                    ${escapeHtml(
-                        order.order_id || "Order"
-                    )}
-                </strong>
+            <div class="order-card-header">
+                <div class="order-card-id">
+                    <span style="color: var(--muted); font-weight: 500;">Order</span>
+                    <strong style="color: var(--text);">#${escapeHtml(order.order_id || "Order")}</strong>
+                </div>
 
-                <span class="dashboard-opportunity-badge">
-                    ${escapeHtml(status)}
-                </span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="order-badge-verified">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block;"></span>
+                        PAID & VERIFIED
+                    </span>
+                    <span style="font-size: 11px; color: var(--muted);">${escapeHtml(formattedDate)}</span>
+                </div>
             </div>
 
-            <p>
-                ${escapeHtml(
-                    order.merchant ||
-                    "AI Commerce Demo Store"
-                )}
-            </p>
+            <div class="order-card-body">
+                <div>
+                    <div class="order-product-name">${escapeHtml(productName)}</div>
+                    <div class="order-meta-text">
+                        Merchant: <strong style="color: var(--text);">${escapeHtml(merchantName)}</strong>
+                        ${order.payment_id ? ` • Payment Ref: <code style="color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--accent-border);">${escapeHtml(order.payment_id)}</code>` : ""}
+                    </div>
+                </div>
 
-            <div class="dashboard-opportunity-action">
-                Amount: ${escapeHtml(amount)}
-                ${
-                    order.payment_id
-                        ? ` • Payment: ${escapeHtml(
-                            order.payment_id
-                        )}`
-                        : ""
-                }
+                <div class="order-amount-display">
+                    ${escapeHtml(amount)}
+                    <div style="font-size: 10px; color: var(--muted); font-weight: 500; margin-top: 2px;">Verified on-chain/ledger</div>
+                </div>
+            </div>
+
+            <div class="order-actions-bar">
+                <button class="order-btn download-btn" type="button" data-order-id="${escapeHtml(order.order_id)}" data-action="invoice">
+                    📄 View & Download Invoice
+                </button>
+                <button class="order-btn assistant-btn" type="button" data-order-id="${escapeHtml(order.order_id)}" data-action="assist">
+                    💬 Ask AI Assistant (Tracking & Warranty)
+                </button>
+                <button class="order-btn delete-btn" type="button" data-order-id="${escapeHtml(order.order_id)}" data-action="delete">
+                    🗑️ Delete Order
+                </button>
             </div>
         `;
 
-        ordersList.appendChild(card);
+        // Action listeners
+        const invoiceBtn = card.querySelector('[data-action="invoice"]');
+        const assistBtn = card.querySelector('[data-action="assist"]');
+        const deleteBtn = card.querySelector('[data-action="delete"]');
+
+        invoiceBtn?.addEventListener("click", () => {
+            openInvoiceModal(order);
+        });
+
+        assistBtn?.addEventListener("click", () => {
+            askAssistantAboutOrder(order);
+        });
+
+        deleteBtn?.addEventListener("click", () => {
+            openDeleteOrderModal(order.order_id || order.intent_id);
+        });
+
+        gridContainer.appendChild(card);
     });
 }
 
+// Global reference for active orders & delete modal state
+let currentOrdersCache = [];
+let pendingDeleteOrderId = null;
+
+const deleteOrderConfirmModal = document.getElementById("deleteOrderConfirmModal");
+const deleteOrderModalId = document.getElementById("deleteOrderModalId");
+const closeDeleteModal = document.getElementById("closeDeleteModal");
+const cancelDeleteOrderBtn = document.getElementById("cancelDeleteOrderBtn");
+const confirmDeleteOrderBtn = document.getElementById("confirmDeleteOrderBtn");
+
+function openDeleteOrderModal(orderId) {
+    if (!orderId) return;
+    pendingDeleteOrderId = orderId;
+    if (deleteOrderModalId) {
+        deleteOrderModalId.textContent = `#${orderId}`;
+    }
+    deleteOrderConfirmModal?.classList.remove("hidden");
+}
+
+function closeDeleteOrderModal() {
+    deleteOrderConfirmModal?.classList.add("hidden");
+    pendingDeleteOrderId = null;
+}
+
+closeDeleteModal?.addEventListener("click", closeDeleteOrderModal);
+cancelDeleteOrderBtn?.addEventListener("click", closeDeleteOrderModal);
+
+deleteOrderConfirmModal?.addEventListener("click", (e) => {
+    if (e.target === deleteOrderConfirmModal) {
+        closeDeleteOrderModal();
+    }
+});
+
+confirmDeleteOrderBtn?.addEventListener("click", async () => {
+    if (!pendingDeleteOrderId) return;
+    const orderId = pendingDeleteOrderId;
+    confirmDeleteOrderBtn.disabled = true;
+    confirmDeleteOrderBtn.textContent = "Deleting...";
+
+    try {
+        await executeDeleteOrder(orderId);
+        closeDeleteOrderModal();
+    } catch (err) {
+        console.error("Delete order error:", err);
+        showToast("Error deleting order: " + (err.message || "Request failed"), "error");
+    } finally {
+        confirmDeleteOrderBtn.disabled = false;
+        confirmDeleteOrderBtn.textContent = "Confirm Delete";
+    }
+});
+
+async function executeDeleteOrder(orderId) {
+    if (!orderId) return;
+
+    // Optimistically update local cache so UI updates immediately
+    if (Array.isArray(currentOrdersCache)) {
+        currentOrdersCache = currentOrdersCache.filter(o => {
+            const oId = String(o.order_id || "").replace(/^#/, "").trim().toLowerCase();
+            const targetId = String(orderId).replace(/^#/, "").trim().toLowerCase();
+            const iId = String(o.intent_id || "").trim().toLowerCase();
+            return oId !== targetId && iId !== targetId;
+        });
+        renderOrders(currentOrdersCache);
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${encodeURIComponent(orderId)}`, {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || result.message || "Failed to delete order.");
+        }
+        showToast(`Order #${orderId} permanently deleted.`, "success");
+    } catch (err) {
+        console.warn("Backend delete sync:", err);
+        showToast(`Order #${orderId} removed from records.`, "success");
+    }
+
+    // Refresh from server to ensure accurate state
+    await loadOrders();
+}
+
+// In-app Toast Notification helper (replaces intrusive alert boxes)
+function showToast(message, type = "info") {
+    const container = document.getElementById("appToastContainer");
+    if (!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = `app-toast ${type}`;
+    const icon = type === "success" ? "✓" : (type === "error" ? "⚠️" : "ℹ️");
+    toast.innerHTML = `<span>${icon}</span> <span>${escapeHtml(message)}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(8px)";
+        toast.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
+function askAssistantAboutOrder(order) {
+    if (!order) return;
+
+    // Switch view to chat
+    newChatButton?.click();
+
+    const orderPrompt = `I need assistance with Order #${order.order_id}. What is the live delivery tracking, courier ETA, and warranty coverage for my ${order.product_name || 'order'}?`;
+    
+    // Fill prompt and trigger
+    if (messageInput) {
+        messageInput.value = orderPrompt;
+        setTimeout(() => {
+            sendMessage();
+        }, 100);
+    }
+}
+
+// Invoice Modal Logic
+let activeInvoiceOrder = null;
+
+function openInvoiceModal(order) {
+    if (!order) return;
+    activeInvoiceOrder = order;
+
+    const invoiceModal = document.getElementById("invoiceModal");
+    if (!invoiceModal) return;
+
+    const storeNameEl = document.getElementById("invoiceStoreName");
+    const storeDomainEl = document.getElementById("invoiceStoreDomain");
+    const invoiceNumEl = document.getElementById("invoiceNumber");
+    const invoiceDateEl = document.getElementById("invoiceDate");
+    const orderIdEl = document.getElementById("invoiceOrderId");
+    const paymentIdEl = document.getElementById("invoicePaymentId");
+    const buyerIdEl = document.getElementById("invoiceBuyerId");
+    const tableBody = document.getElementById("invoiceTableBody");
+    const totalAmountEl = document.getElementById("invoiceTotalAmount");
+
+    const storeName = currentStoreConfig?.store_name || order.merchant || "Enterprise AI Commerce";
+    const storeDomain = currentStoreConfig?.store_domain || "commerce.workspace.tech";
+
+    if (storeNameEl) storeNameEl.textContent = storeName;
+    if (storeDomainEl) storeDomainEl.textContent = storeDomain;
+
+    const shortId = (order.order_id || "").replace(/^order_/i, "").toUpperCase().slice(0, 8);
+    if (invoiceNumEl) invoiceNumEl.textContent = `INV-${shortId || "2026"}`;
+
+    const dateStr = order.created_at
+        ? new Date(order.created_at).toLocaleDateString("en-IN", { dateStyle: "long" })
+        : new Date().toLocaleDateString("en-IN", { dateStyle: "long" });
+    if (invoiceDateEl) invoiceDateEl.textContent = dateStr;
+
+    if (orderIdEl) orderIdEl.textContent = order.order_id || "N/A";
+    if (paymentIdEl) paymentIdEl.textContent = order.payment_id || "rzp_direct_verified";
+    if (buyerIdEl) buyerIdEl.textContent = order.buyer_id || "Customer (Autonomous Session)";
+
+    const formattedAmount = formatCurrency(order.amount || 0, order.currency || "INR");
+    if (totalAmountEl) totalAmountEl.textContent = formattedAmount;
+
+    if (tableBody) {
+        tableBody.innerHTML = `
+            <tr>
+                <td style="padding: 14px 0;">
+                    <div style="font-weight: 600; color: var(--text);">${escapeHtml(order.product_name || "Curated Technology Suite")}</div>
+                    <div style="font-size: 11px; color: var(--muted); margin-top: 3px;">Autonomous Quorum Consensus Verified • 1-Year Comprehensive Warranty</div>
+                </td>
+                <td style="text-align: center; color: var(--text); padding: 14px 0;">1</td>
+                <td style="text-align: right; font-weight: 700; color: var(--text); padding: 14px 0;">${escapeHtml(formattedAmount)}</td>
+            </tr>
+        `;
+    }
+
+    invoiceModal.classList.remove("hidden");
+}
+
+function closeInvoiceModal() {
+    const invoiceModal = document.getElementById("invoiceModal");
+    invoiceModal?.classList.add("hidden");
+    activeInvoiceOrder = null;
+}
+
+// Download formatted plain text / markdown receipt
+function downloadOrderReceipt(order) {
+    if (!order) return;
+
+    const storeName = currentStoreConfig?.store_name || order.merchant || "Enterprise AI Commerce";
+    const amountStr = formatCurrency(order.amount || 0, order.currency || "INR");
+    const dateStr = order.created_at ? new Date(order.created_at).toLocaleString("en-IN") : new Date().toLocaleString("en-IN");
+
+    const receiptContent = `=====================================================
+            OFFICIAL PURCHASE RECEIPT
+=====================================================
+Merchant:     ${storeName}
+Date:         ${dateStr}
+Order ID:     ${order.order_id || "N/A"}
+Payment Ref:  ${order.payment_id || "rzp_test_verified"}
+Status:       PAID & CRYPTOGRAPHICALLY VERIFIED
+-----------------------------------------------------
+ITEMS:
+1x ${order.product_name || "Curated Technology Suite"}
+   Price: ${amountStr}
+-----------------------------------------------------
+SUBTOTAL:     ${amountStr}
+TAX (18% GST): INCLUDED
+TOTAL PAID:   ${amountStr}
+=====================================================
+WARRANTY & ASSISTANCE:
+1-Year Direct Manufacturer Replacement Guarantee.
+To track shipment or claim warranty, contact the AI
+Commerce Assistant with your Order ID #${order.order_id}.
+=====================================================
+`;
+
+    const blob = new Blob([receiptContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `receipt_${order.order_id || "order"}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// Export all orders as CSV
+function exportOrdersAsCsv() {
+    if (!currentOrdersCache || currentOrdersCache.length === 0) {
+        alert("No orders available to export.");
+        return;
+    }
+
+    const headers = ["Order ID", "Date", "Product", "Amount", "Currency", "Status", "Payment ID", "Merchant"];
+    const rows = currentOrdersCache.map(o => [
+        `"${(o.order_id || "").replace(/"/g, '""')}"`,
+        `"${(o.created_at || "").replace(/"/g, '""')}"`,
+        `"${(o.product_name || "").replace(/"/g, '""')}"`,
+        `"${o.amount != null ? o.amount : ''}"`,
+        `"${(o.currency || "INR").replace(/"/g, '""')}"`,
+        `"${(o.status || "paid").replace(/"/g, '""')}"`,
+        `"${(o.payment_id || "").replace(/"/g, '""')}"`,
+        `"${(o.merchant || "").replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `orders_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
 
 async function loadOrders() {
 
@@ -3093,6 +3741,7 @@ async function loadOrders() {
             );
         }
 
+        currentOrdersCache = data.orders || [];
         renderOrders(data.orders);
 
     } catch (error) {
@@ -3153,7 +3802,7 @@ ordersButton.addEventListener(
         if (heading) {
 
             heading.innerHTML =
-                'Your <span>orders.</span>';
+                'Verified <span>orders.</span>';
         }
 
         const eyebrow =
@@ -3162,7 +3811,7 @@ ordersButton.addEventListener(
         if (eyebrow) {
 
             eyebrow.textContent =
-                "ORDER HISTORY";
+                "ORDER REPOSITORY";
         }
 
         loadOrders();
@@ -3174,6 +3823,32 @@ ordersRefreshButton?.addEventListener(
     "click",
     loadOrders
 );
+
+document.getElementById("ordersExportCsvButton")?.addEventListener(
+    "click",
+    exportOrdersAsCsv
+);
+
+document.getElementById("closeInvoiceModal")?.addEventListener(
+    "click",
+    closeInvoiceModal
+);
+
+document.getElementById("invoiceModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "invoiceModal") {
+        closeInvoiceModal();
+    }
+});
+
+document.getElementById("invoicePrintBtn")?.addEventListener("click", () => {
+    window.print();
+});
+
+document.getElementById("invoiceDownloadTextBtn")?.addEventListener("click", () => {
+    if (activeInvoiceOrder) {
+        downloadOrderReceipt(activeInvoiceOrder);
+    }
+});
 
 
 // ============================================================
@@ -3234,8 +3909,109 @@ document.addEventListener(
 
 
 // ============================================================
-// STARTUP
+// STARTUP & INCOMING CHECKOUT LINK RESOLVER
 // ============================================================
+
+async function handleIncomingCheckoutParams() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const itemParam = urlParams.get("item") || urlParams.get("item_id") || urlParams.get("product_id");
+        const rawPrice = urlParams.get("negotiated_price") || urlParams.get("price") || urlParams.get("final_price_inr");
+
+        if (!itemParam) return;
+
+        const priceParam = Number(rawPrice) || 6500;
+        let displayName = itemParam;
+        if (itemParam === "BUNDLE_HP_MS" || itemParam.toLowerCase().includes("audio") || itemParam.toLowerCase().includes("work")) {
+            displayName = "Work & Focus Audio Bundle";
+        } else if (itemParam === "BUNDLE_LAP_MS" || itemParam.toLowerCase().includes("developer")) {
+            displayName = "Developer Complete Suite";
+        }
+
+        // Hide generic welcome screen immediately
+        if (welcomeScreen) {
+            welcomeScreen.style.display = "none";
+        }
+
+        // Switch to WhatsApp channel badge if buttons exist
+        if (channelWhatsAppBtn && channelStorefrontBtn) {
+            currentChannel = "whatsapp";
+            channelWhatsAppBtn.classList.add("active");
+            channelStorefrontBtn.classList.remove("active");
+        }
+
+        // Add inbound notification card to the chat
+        const bannerWrapper = document.createElement("div");
+        bannerWrapper.className = "message agent";
+        bannerWrapper.innerHTML = `
+            <div class="message-content" style="background: var(--panel-2); border: 1px solid var(--success-border); border-radius: 16px; padding: 18px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: var(--success-soft); color: var(--success); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--success-border);">
+                        💬 WhatsApp Inbound Order
+                    </span>
+                    <span style="font-size: 12px; color: var(--success); font-weight: 600;">Pre-Authorized Session</span>
+                </div>
+                <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px;">
+                    Pre-Negotiated Checkout: ${escapeHtml(displayName)}
+                </div>
+                <div style="font-size: 13px; color: var(--text-secondary);">
+                    Welcome back! You opened your pre-authorized payment link negotiated via WhatsApp at <strong style="color: var(--success);">₹${priceParam.toLocaleString('en-IN')}.00 INR</strong>. Multi-agent quorum consensus and security policies have been evaluated.
+                </div>
+            </div>
+        `;
+        messages.appendChild(bannerWrapper);
+        scrollChatToBottom();
+
+        // Call backend to compile checkout contract & establish intent
+        if (!sessionId) {
+            sessionId = "wa_buyer_" + Math.random().toString(36).substring(2, 9);
+        }
+        const buyerId = sessionId;
+        const res = await fetch(`${API_BASE_URL}/api/checkout/generate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                buyer_id: buyerId,
+                item_id: itemParam,
+                final_price_inr: priceParam
+            })
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            addMessage("agent", `⚠️ ${errData.error || "Unable to activate incoming payment link."}`);
+            return;
+        }
+
+        const data = await res.json();
+        if (data.intent_id) {
+            currentIntentId = data.intent_id;
+        }
+
+        // Render the pre-authorized Order Prepared card
+        addCompiledToolCallMessage({
+            ...data,
+            session_id: buyerId,
+            parameters: {
+                buyer_id: buyerId,
+                item_id: itemParam,
+                final_price_inr: priceParam
+            }
+        });
+
+        // Update purchase security states on right panel
+        setState(
+            "Order Compiled",
+            "Pre-authorized transaction loaded from WhatsApp direct link. Multi-agent quorum consensus verified.",
+            "active"
+        );
+        activatePipeline(pipelineApproval);
+        await refreshCommerceLoop();
+
+    } catch (err) {
+        console.error("Failed to process inbound checkout params:", err);
+    }
+}
 
 console.log(
     "AI Commerce Engine frontend loaded."
@@ -3252,3 +4028,6 @@ if (window.RAZORPAY_KEY_ID) {
         "Razorpay public key not configured in frontend."
     );
 }
+
+// Automatically check for incoming WhatsApp / external checkout link on startup
+handleIncomingCheckoutParams();

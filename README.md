@@ -1,85 +1,95 @@
-# Autonomous Dynamic Commerce Orchestrator (Phase 7 Enterprise Staging Core)
+# Autonomous Dynamic Commerce Orchestrator & Multi-Agent Negotiation Engine
 
-> **Agentic commerce orchestrator with dynamic financial firewalls, multi-agent quorum consensus, and deterministic Razorpay-native checkout delegation.**
+[![Build & Tests](https://github.com/your-org/autonomous-commerce-orchestrator/actions/workflows/tests.yml/badge.svg)](https://github.com/your-org/autonomous-commerce-orchestrator/actions)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg?logo=node.js)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.12-yellow.svg?logo=python)](https://python.org/)
+[![Payment](https://img.shields.io/badge/Gateway-Razorpay%20Live%20Ready-blueviolet.svg)](https://razorpay.com/)
+[![Governance](https://img.shields.io/badge/Quorum-3--Agent%20Consensus-emerald.svg)](#3-agent-quorum-consensus)
+[![Security](https://img.shields.io/badge/Security-Financial%20Firewall%20Enforced-red.svg)](#security--governance-architecture)
+
+> **Enterprise-grade autonomous commerce orchestrator featuring dynamic margin protection firewalls, 3-agent multi-model quorum consensus, deterministic Razorpay checkout delegation, and multi-channel conversational shopping (Web + WhatsApp).**
 
 ---
 
-## 1. System Architecture Overview
+## 1. Executive Summary & Core Value Proposition
 
-The **Autonomous Dynamic Commerce Orchestrator** separates conversational understanding from financial execution authority. AI agents reason about buyer intent, guide product recommendations, and manage interactive negotiation, but the underlying system deterministically guards floor prices, enforces cryptographic token verification, evaluates multi-agent consensus, and generates immutable audit trails.
+Modern conversational AI systems frequently suffer from **financial hallucinations**—spontaneously offering unviable discounts, accepting sub-cost offers, or committing to arbitrary warranty terms. 
+
+The **Autonomous Dynamic Commerce Orchestrator** decouples natural language comprehension from financial execution authority:
+
+1. **AI Decides, Deterministic Enclave Authorizes**: LLMs reason about buyer intent, catalog specifications, and persuasive negotiation. However, no discount, bundle composition, or checkout link can be generated without strict runtime validation by the financial firewall and multi-agent quorum.
+2. **Dynamic Margin Protection Firewall**: Hard-enforces a corporate price floor (default: `₹4,500.00 INR`). Requests for individual sub-floor items immediately halt text generation and pivot customers to approved executive bundle suites.
+3. **3-Agent Quorum Consensus**: Before checkout delegation, three independent validation agents evaluate valuation, catalog legitimacy, and cryptographic security. A 2/3 majority consensus is strictly mandatory.
+4. **Razorpay-Native Live Checkout**: Generates compliant Razorpay payment links and UPI QR codes, with real-time webhook HMAC signature verification.
+5. **Multi-Channel Handshake**: Seamless transition between WhatsApp pre-negotiations and web checkout sessions with pre-authorized cryptographic parameters.
+
+---
+
+## 2. System Architecture Flow
 
 ```text
-[ Shopper Request / Inbound Agent Message ]
-                    │
-                    ▼
-       ┌─────────────────────────┐
-       │   JWT Session Parser    │ ➔ Extracts cryptographically validated `buyer_id`
-       └────────────┬────────────┘
-                    │
-                    ▼
-       ┌─────────────────────────┐
-       │ Dynamic Enclave Config  │ ➔ Loads CURRENT_FLOOR (₹4,500 INR) & ACTIVE_MATRIX
-       └────────────┬────────────┘
-                    │
-                    ├─────────────────────────────────────────────────┐
-                    │                                                 │
-          [ Price < Current Floor ]                        [ Price >= Current Floor ]
-                    │                                                 │
-                    ▼                                                 ▼
-       ┌─────────────────────────┐                       ┌─────────────────────────┐
-       │   Financial Firewall    │                       │   3-Agent Quorum Engine │
-       │ KILL_TEXT_PROCESSING_   │                       │ (Valuation + Catalog +  │
-       │          LOOP           │                       │    Security Signer)     │
-       └────────────┬────────────┘                       └────────────┬────────────┘
-                    │                                                 │
-                    ▼                                                 ▼ [ Consensus >= 2/3 ]
-       ┌─────────────────────────┐                       ┌─────────────────────────┐
-       │  Strict JSON Broadcast  │                       │ Conversational Buffer   │
-       │ (Cross-sell to Suites)  │                       │      Suppression        │
-       └────────────┬────────────┘                       └────────────┬────────────┘
-                    │                                                 │
-                    │                                                 ▼
-                    │                                    ┌─────────────────────────┐
-                    │                                    │ Razorpay Live Checkout  │
-                    │                                    │  generate_secure_       │
-                    │                                    │       checkout          │
-                    │                                    └────────────┬────────────┘
-                    │                                                 │
-                    ▼                                                 ▼
-       ┌───────────────────────────────────────────────────────────────────────────┐
-       │                    Cryptographic Persistence Telemetry                    │
-       │               (persistence_logs.json / MUTATION_BLOCKED / AUDIT)          │
-       └───────────────────────────────────────────────────────────────────────────┘
+               ┌──────────────────────────────────────────────┐
+               │    Inbound Shopper Request / WhatsApp Hook   │
+               └──────────────────────┬───────────────────────┘
+                                      │
+                                      ▼
+               ┌──────────────────────────────────────────────┐
+               │         JWT & Identity Enclave Parser        │
+               │    Extracts authenticated buyer credentials  │
+               └──────────────────────┬───────────────────────┘
+                                      │
+                                      ▼
+               ┌──────────────────────────────────────────────┐
+               │          Dynamic Enclave Evaluation          │
+               │   Loads CURRENT_FLOOR (₹4,500) & BUNDLE MATRIX│
+               └──────────────────────┬───────────────────────┘
+                                      │
+                ┌─────────────────────┴─────────────────────┐
+                │                                           │
+      [ Valuation < Floor ]                       [ Valuation >= Floor ]
+                │                                           │
+                ▼                                           ▼
+┌───────────────────────────────┐           ┌───────────────────────────────┐
+│      Financial Firewall       │           │     3-Agent Quorum Engine     │
+│   KILL_TEXT_PROCESSING_LOOP   │           │ 1. Valuation Auditor Agent    │
+│  Instant Stream Interception  │           │ 2. Catalog Policy Agent       │
+└───────────────┬───────────────┘           │ 3. Security Signer Agent      │
+                │                           └───────────────┬───────────────┘
+                ▼                                           │
+┌───────────────────────────────┐                           ▼ [ Quorum >= 2/3 ]
+│    Strict JSON Cross-Sell     │           ┌───────────────────────────────┐
+│ Rejection Envelope pivoting   │           │  Conversational Suppression   │
+│ to verified Executive Suites  │           │ Drops chat text, locks final  │
+└───────────────┬───────────────┘           │ terms into structured payload │
+                │                           └───────────────┬───────────────┘
+                │                                           │
+                │                                           ▼
+                │                           ┌───────────────────────────────┐
+                │                           │    Razorpay Checkout Engine   │
+                │                           │ Payment Links / UPI / QR Core │
+                │                           └───────────────┬───────────────┘
+                │                                           │
+                ▼                                           ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      Cryptographic Audit & Telemetry                      │
+│        (Non-repudiation ledger, blocked mutations, and order states)       │
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Core Operational Principles
+## 3. Key Capabilities & Functional Modules
 
-1. **AI Decides, System Authorizes**: AI cannot execute transactions, alter catalog prices, or lower baseline margins below the corporate floor.
-2. **Container-Isolated Dynamic Runtime**: System parameters (`CURRENT_FLOOR`, `CORPORATE_MINIMUM_PRICE_FLOOR_INR`, and `ACTIVE_MATRIX`) are dynamically evaluated on every execution cycle without requiring service restarts.
-3. **Data Isolation & Sanitization**: Internal execution labels, benchmark files, and private keys (e.g. `SHA256`, `locustfile`, `Rule 1`, `Rule 2`) are replaced with `[PROTECTED]` across all outward-facing data streams.
-4. **Conversational Buffer Suppression**: On verified purchase confirmation, conversational text streaming is terminated, emitting solely the pure structured checkout delegation payload.
-
----
-
-## 3. Key Modules & Functional Capabilities
-
-### A. Container Runtime & Identity Resolution
-- **Header Parsing**: Extracts authenticated shopper metrics (`buyer_id`) directly from standard `Authorization: Bearer <JWT>` session headers.
-- **Dynamic Configuration Enclave**:
-  - `CURRENT_FLOOR`: Minimum corporate baseline (default `4500.00` INR).
-  - `ACTIVE_MATRIX`: Synchronized bundle suites with verified margins.
-
-### B. Financial Firewall & Stream Interception
-- **Real-Time Threshold Evaluation**: Continuously validates user budget intents and demanded valuations against `current_floor`.
-- **Stream Termination**: Immediately halts `KILL_TEXT_PROCESSING_LOOP` whenever sub-floor metrics are detected, bypassing catalog searches to sustain maximum concurrent throughput.
-- **Strict JSON Broadcast Envelope**: Returns a structured rejection payload pivoting shoppers to authorized executive bundles:
+### A. Autonomous Margin Protection Firewall
+- **Real-Time Threshold Gate**: Evaluates requested valuations against `CURRENT_FLOOR` (`₹4,500 INR`).
+- **Stream Termination**: Bypasses catalog lookups to abort processing immediately when sub-floor prices are detected.
+- **Strict JSON Rejection Envelope**:
   ```json
   {
     "status": "BLOCKED_BY_DYNAMIC_FIREWALL",
     "current_floor": 4500.00,
-    "message": "Welcome to our executive suite showroom. We specialize exclusively in synchronized, high-performance workstation packages tailored for uninterrupted productivity. Standalone sub-tier items are unavailable; we invite you to explore our certified productivity suites:",
+    "message": "Welcome to our executive suite showroom. Standalone sub-tier items are unavailable; we invite you to explore our certified productivity suites:",
     "authorized_cross_sell_bundles": [
       { "name": "Work & Focus Audio Bundle", "sku": "BUNDLE_HP_MS", "valuation_inr": 6500.00 },
       { "name": "Developer Complete Suite", "sku": "BUNDLE_LAP_MS", "valuation_inr": 51500.00 }
@@ -87,17 +97,14 @@ The **Autonomous Dynamic Commerce Orchestrator** separates conversational unders
   }
   ```
 
-### C. 3-Agent Quorum Consensus Scanner
-Before checkout compilation, an automated internal evaluation is performed by three independent validation agents:
-- **`agent_valuation_auditor`**: Enforces strict adherence to corporate floor requirements and pricing bounds.
-- **`agent_catalog_policy`**: Verifies item availability, SKU legitimacy, and bundled asset compatibility.
-- **`agent_security_signer`**: Checks token signature validity, session state consistency, and identity integrity.
+### B. 3-Agent Quorum Consensus
+Every authorized transaction must be evaluated and signed off by:
+1. **`agent_valuation_auditor`**: Verifies minimum gross margins and mathematical price integrity.
+2. **`agent_catalog_policy`**: Verifies product SKUs, stock allocations, and bundle pairing legality.
+3. **`agent_security_signer`**: Validates session integrity, token nonce, and buyer authentication.
 
-Only transactions securing a **$\ge 2/3$ majority consensus** proceed to checkout delegation.
-
-### D. Razorpay-Native Checkout Delegation
-When a compliant purchase confirmation is detected, the orchestrator suppresses conversational chatter and outputs the raw, deterministic execution tool invocation:
-
+### C. Razorpay Live Checkout Delegation
+Upon reaching consensus, the orchestrator suppresses conversational banter and emits a deterministic execution schema:
 ```json
 {
   "tool": "generate_secure_checkout",
@@ -114,90 +121,168 @@ When a compliant purchase confirmation is detected, the orchestrator suppresses 
 }
 ```
 
-### E. Cryptographic Audit & Telemetry Logging
-- **`persistence_logs.json`**: An append-only audit trail logging every interception (`MUTATION_BLOCKED`), quorum vote matrix, and checkout confirmation.
-- Each event includes timestamps, evaluated prices, agent votes, consensus status, and shopper identity hashes.
+### D. Full Order Lifecycle & Invoicing
+- **Verified Order Ledger**: Live tracking of paid, pending, and completed transactions.
+- **Official Tax Invoices**: Downloadable PDF and printable tax receipts with GST calculations.
+- **Order Management & Deletion**: Safe order deletion with a dedicated in-app confirmation modal and multi-identifier backend resolution.
+- **Dual-Theme Support**: Dark and Light themes with WCAG AA compliance and instant local preference persistence.
 
 ---
 
-## 4. API Endpoints Reference
+## 4. Repository Directory Structure
 
-| Route | Method | Description |
-|---|---|---|
-| `/orchestrate` | `POST` | Core orchestrator endpoint handling multi-turn negotiation, firewall enforcement, quorum scanning, and tool delegation. |
-| `/conversational-shop` | `POST` | Conversational shopping endpoint with session memory and dynamic cross-sell pivoting. |
-| `/api/checkout/generate` | `POST` | Direct tool compilation endpoint with quorum evaluation and Razorpay configuration. |
-| `/api/buyer/profile` | `GET` | Authenticated shopper profile and identity details. |
-| `/api/merchant/dashboard` | `GET` | Merchant metrics, active policy rules, and revenue performance. |
-| `/api/merchant/inventory` | `GET` | Catalog inventory, stock allocations, and bundle definitions. |
-| `/api/merchant/revenue-agent` | `GET` | Revenue intelligence recommendations and margin optimizations. |
-| `/api/audit-logs` | `GET` | Historical cryptographic audit log entries. |
-| `/health` | `GET` | Enclave health, active floor parameter, and subsystem status. |
+```text
+├── .github/
+│   └── workflows/
+│       └── tests.yml            # CI pipeline executing automated Python test suites
+├── frontend/
+│   ├── app.js                   # Client logic, theme manager, telemetry, order ledger
+│   ├── index.html               # Responsive single-page interface with dual-theme styling
+│   ├── modal.js                 # Approval and transaction modal controllers
+│   └── razorpay-checkout.js     # Client Razorpay checkout integration
+├── models/
+│   ├── bundle.py                # Bundle data models and catalog schemas
+│   ├── intent.py                # Buyer intent structure & state machines
+│   └── order.py                 # Order representations and database schemas
+├── src/
+│   ├── config.ts                # TypeScript server configuration
+│   └── types.ts                 # Domain interfaces and consensus definitions
+├── tests/
+│   ├── test_api.py              # API endpoint validation and mock transactions
+│   ├── test_payment.py          # Razorpay signature and checkout unit tests
+│   ├── test_persistence.py      # Ledger persistence and mutation block testing
+│   └── test_webhook.py          # Razorpay webhook HMAC validation tests
+├── .env.example                 # Template for required environment variables
+├── .gitignore                   # Rigorous exclusion of secrets, logs, and artifacts
+├── main.py                      # FastAPI core engine and quorum validation routes
+├── package.json                 # Node.js dependencies and compilation scripts
+├── payment.py                   # Razorpay API client and webhook signature verifier
+├── policy.py                    # Financial firewall rules and corporate floor checks
+├── requirements.txt             # Python runtime dependencies
+├── server.ts                    # Production TypeScript/Express orchestrator server
+└── tsconfig.json                # TypeScript compiler configuration
+```
 
 ---
 
-## 5. Active Inventory Matrix
+## 5. Security & Governance Architecture
 
-| Bundle Name | SKU | Included SKUs | Standard Valuation (INR) |
+### Strict GitHub Push Protection (Safe by Design)
+This repository includes a strict security policy configured in `.gitignore`:
+- **Zero Secret Exposure**: `.env`, credentials, private keys (`.pem`, `.key`), and certificates are strictly ignored.
+- **No Runtime State in Git**: Transaction logs (`intents.json`, `audit_logs.json`, `persistence_logs.json`) are blocked from commits.
+- **No Build Artifacts**: `node_modules/`, `dist/`, and virtual environments (`.venv/`) are excluded.
+
+### Threat Model & Safeguards
+- **HMAC-SHA256 Signature Verification**: All Razorpay webhooks require cryptographic signature verification using `RAZORPAY_WEBHOOK_SECRET`.
+- **Data Sanitization**: Internal execution labels and sensitive descriptors are masked as `[PROTECTED]` across all outward-facing API streams.
+- **Deterministic Enclave**: Critical financial bounds (`CURRENT_FLOOR`) are evaluated dynamically in isolated runtime contexts.
+
+---
+
+## 6. Environment Configuration
+
+Copy the template file to configure your local or deployment environment:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Required | Default | Description |
 |---|---|---|---|
-| **Work & Focus Audio Bundle** | `BUNDLE_HP_MS` | `HP001`, `MS001` | ₹6,500.00 |
-| **Developer Complete Suite** | `BUNDLE_LAP_MS` | `LAP001`, `MS001` | ₹51,500.00 |
-
-*Baseline Corporate Floor*: **₹4,500.00 INR** (Standalone sub-tier items under this threshold are blocked by the Financial Firewall).
+| `PORT` | Optional | `3000` | Application HTTP server port |
+| `CURRENT_FLOOR` | Yes | `4500` | Corporate baseline price floor in INR |
+| `CORPORATE_MINIMUM_PRICE_FLOOR_INR` | Yes | `4500` | Fallback parameter for policy validation |
+| `ACTIVE_MATRIX` | Yes | `[...]` | JSON array of approved product bundles |
+| `RAZORPAY_KEY_ID` | Yes | `rzp_test_...` | Razorpay API Key ID |
+| `RAZORPAY_KEY_SECRET` | Yes | - | Razorpay API Key Secret |
+| `RAZORPAY_WEBHOOK_SECRET`| Optional | - | Webhook HMAC verification secret |
+| `WHATSAPP_VERIFY_TOKEN` | Optional | - | Meta/WhatsApp Webhook token |
 
 ---
 
-## 6. Development & Deployment Guide
+## 7. Installation & Quickstart
 
 ### Prerequisites
-- Node.js (v20+ recommended)
-- npm / npx
+- **Node.js**: v20 or newer
+- **Python**: v3.10 or v3.12+
+- **npm** or **bun**
 
-### Setup & Run
+### 1. Clone & Install Dependencies
 ```bash
-# Install dependencies
+# Clone the repository
+git clone https://github.com/your-username/autonomous-commerce-orchestrator.git
+cd autonomous-commerce-orchestrator
+
+# Install Node.js dependencies
 npm install
 
-# Start development server with live compilation
+# (Optional) Install Python dependencies for core validation tests
+python3 -m pip install -r requirements.txt
+```
+
+### 2. Run the Development Server
+```bash
 npm run dev
+```
+The server starts at `http://localhost:3000` with hot-reloading and live compilation.
 
-# Build for production (compiled to dist/server.cjs)
+### 3. Build for Production
+```bash
 npm run build
-
-# Start production server
 npm start
 ```
 
-### Environment Variables (`.env`)
-```env
-PORT=3000
-CURRENT_FLOOR=4500
-CORPORATE_MINIMUM_PRICE_FLOOR_INR=4500
-RAZORPAY_KEY_ID=rzp_test_placeholder
-RAZORPAY_KEY_SECRET=placeholder_secret
-ACTIVE_MATRIX=[{"name":"Work & Focus Audio Bundle","sku":"BUNDLE_HP_MS","valuation_inr":6500},{"name":"Developer Complete Suite","sku":"BUNDLE_LAP_MS","valuation_inr":51500}]
-```
+---
 
-### Verification & Testing Commands
-```bash
-# Test sub-floor firewall interception (Returns strict JSON rejection envelope)
-curl -s -X POST http://localhost:3000/orchestrate \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <JWT>" \
-  -d '{"message":"Can I buy mouse for 1200 INR?"}'
+## 8. API Reference Guide
 
-# Test compliant bundle checkout delegation (Returns Razorpay tool call)
-curl -s -X POST http://localhost:3000/orchestrate \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <JWT>" \
-  -d '{"message":"I confirm order for Work & Focus Audio Bundle BUNDLE_HP_MS at 6500"}'
-```
+### Core Orchestration
+- **`POST /orchestrate`**  
+  Primary endpoint handling conversational shopping, financial firewall gating, quorum validation, and checkout delegation.
+  - *Header*: `Authorization: Bearer <JWT_TOKEN>`
+  - *Body*: `{"message": "I want to purchase the Work & Focus Audio Bundle"}`
+
+### Direct Checkout Generation
+- **`POST /api/checkout/generate`**  
+  Compiles verified items into signed Razorpay checkout orders.
+  - *Body*: `{"item_id": "BUNDLE_HP_MS", "final_price_inr": 6500, "buyer_id": "buyer_01"}`
+
+### Order Ledger Management
+- **`GET /api/orders`**  
+  Retrieves all historical verified orders, invoice statuses, and transaction receipts.
+- **`DELETE /api/orders/:orderId`**  
+  Deletes an order record from the ledger with multi-format ID matching.
+
+### Telemetry & Audit Logs
+- **`GET /api/audit-logs`**  
+  Retrieves cryptographic logs of firewall blocks, quorum decisions, and transaction state mutations.
+- **`GET /health`**  
+  Reports system health, active price floor, and quorum status.
 
 ---
 
-## 7. Security & Compliance Safeguards
+## 9. Automated Testing & Verification
 
-- **No Financial Hallucination**: AI model outputs cannot bypass minimum floors or generate unapproved discount codes.
-- **Zero Raw PII Exposure**: Header authorization tokens are parsed safely, with internal runtime descriptors sanitized as `[PROTECTED]`.
-- **Deterministic Quorum Gates**: No single agent or user prompt can trigger transaction execution without multi-agent validation.
-- **Idempotent Audit Persistence**: State transitions and blocked mutations are committed to disk synchronously to preserve full forensic tracebility.
+Run the test suite to verify firewall logic, Razorpay signatures, and persistence security:
+
+```bash
+# Run all unit tests
+pytest -q
+
+# Run specific payment & webhook verification tests
+pytest tests/test_payment.py tests/test_webhook.py -v
+```
+
+GitHub Actions automatically runs these tests on every push and pull request to the `main` branch.
+
+---
+
+## 10. Contributing & License
+
+Contributions are welcome! Please ensure that:
+1. No sensitive credentials or log files are tracked in commits.
+2. All pull requests pass CI tests in `.github/workflows/tests.yml`.
+3. Code formatting adheres to TypeScript and PEP 8 standards.
+
+Distributed under the **MIT License**. See `LICENSE` for more details.

@@ -10,6 +10,11 @@
     >
 
     <title>AI Commerce Engine</title>
+    <meta name="description" content="Autonomous Dynamic Commerce Engine with multi-agent policy consensus, margin protection, and secure checkout delegation.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -124,18 +129,18 @@
                 <div>
 
                     <div class="eyebrow">
-                        ENTERPRISE WORKSPACE STUDIO
+                        AI COMMERCE ENGINE
                     </div>
 
                     <h1>
-                        Curated Workspace
-                        <span>Solutions.</span>
+                        <span id="headerStoreName">Workspace &amp; Audio Tech</span>
+                        <span style="color: var(--accent); font-weight: 300;">Concierge</span>
                     </h1>
 
                 </div>
 
 
-                <div class="connection-status" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div class="connection-status" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
 
                     <div class="channel-selector-group" id="channelSelector">
                         <button class="channel-btn active" id="channelStorefront" type="button" title="Test Web Storefront Concierge">
@@ -146,14 +151,18 @@
                         </button>
                     </div>
 
-                    <span id="headerFloorBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(255, 179, 71, 0.12); border: 1px solid rgba(255, 179, 71, 0.3); border-radius: 999px; font-size: 11px; font-weight: 600; color: #fbd38d;">
-                        ✨ Minimum Suite Tier: ₹4,500 INR
+                    <span id="headerFloorBadge">
+                        Floor: ₹4,500 INR
                     </span>
 
-                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(156, 255, 91, 0.12); border: 1px solid rgba(156, 255, 91, 0.3); border-radius: 999px; font-size: 11px; font-weight: 600; color: #9cff5b;">
-                        <span class="status-dot"></span>
-                        Concierge Online
-                    </span>
+                    <button class="button secondary" id="toggleInspectorBtn" type="button" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;" title="Toggle Telemetry Inspector">
+                        ⚡ Telemetry
+                    </button>
+
+                    <button class="button secondary theme-toggle-btn" id="themeToggleBtn" type="button" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;" title="Toggle Dark/Light Mode">
+                        <span id="themeIcon">🌙</span>
+                        <span id="themeText">Dark Mode</span>
+                    </button>
 
                 </div>
 
@@ -176,17 +185,17 @@
                     id="welcomeScreen"
                 >
 
-                    <div class="welcome-badge" style="background: rgba(156, 255, 91, 0.12); border-color: rgba(156, 255, 91, 0.3); color: #9cff5b;">
-                        ✦ AI Workspace Concierge
+                    <div class="welcome-badge">
+                        ✦ Autonomous Commerce Concierge
                     </div>
 
                     <h2>
-                        Design your ideal
-                        <span>workspace.</span>
+                        Curated Hardware &amp;
+                        <span>Workspace Solutions.</span>
                     </h2>
 
-                    <p style="color: #94a3b8; font-size: 14px; max-width: 580px; margin: 0 auto 24px auto; line-height: 1.6;">
-                        Welcome to our enterprise studio. Tell me about your workflow, preferred peripherals, or productivity targets, and I will configure the ideal curated equipment suite for you.
+                    <p>
+                        Describe your requirements, preferred peripherals, or budget. The autonomous orchestrator evaluates stock, enforces merchant margin policies, and prepares instant pre-authorized checkout contracts.
                     </p>
 
 
@@ -197,11 +206,11 @@
                         <button
                             class="suggestion-card"
                             type="button"
-                            data-message="I am looking for productivity accessories under ₹3,000."
+                            data-message="I am looking for productivity accessories under ₹4,500."
                         >
 
                             <span class="suggestion-icon">
-                                ✨
+                                🛡️
                             </span>
 
                             <span>
@@ -209,7 +218,7 @@
                             </span>
 
                             <small>
-                                View our curated workspace tiers
+                                Tests dynamic policy floor defense
                             </small>
 
                         </button>
@@ -230,7 +239,7 @@
                             </span>
 
                             <small>
-                                Complete Suite: ₹6,500 INR
+                                Authorized Suite · ₹6,500 INR
                             </small>
 
                         </button>
@@ -251,7 +260,7 @@
                             </span>
 
                             <small>
-                                Complete Suite: ₹51,500 INR
+                                Enterprise Station · ₹51,500 INR
                             </small>
 
                         </button>
@@ -284,26 +293,35 @@
 
                     <div>
                         <div class="eyebrow">
-                            ORDER HISTORY
+                            ORDER REPOSITORY
                         </div>
 
                         <h2>
-                            Your <span>orders.</span>
+                            Verified <span>Orders.</span>
                         </h2>
 
                         <p>
-                            View persisted commerce transactions
-                            and verified payment status.
+                            Live tracking, cryptographic receipts, downloads, and AI order assistance.
                         </p>
                     </div>
 
-                    <button
-                        class="button secondary"
-                        id="ordersRefreshButton"
-                        type="button"
-                    >
-                        ↻ Refresh
-                    </button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button
+                            class="button secondary"
+                            id="ordersExportCsvButton"
+                            type="button"
+                            title="Export all orders as CSV"
+                        >
+                            ⤓ Export CSV
+                        </button>
+                        <button
+                            class="button secondary"
+                            id="ordersRefreshButton"
+                            type="button"
+                        >
+                            ↻ Refresh
+                        </button>
+                    </div>
 
                 </div>
 
@@ -389,12 +407,12 @@
                 <div class="dashboard-panel" style="margin-bottom: 24px;">
                     <div class="dashboard-panel-header">
                         <div>
-                            <div class="section-label">LIVE STORE CONFIGURATION & RELATIONAL PERSISTENCE</div>
-                            <h3>Configure Real Merchant Parameters (Cloud SQL PostgreSQL)</h3>
+                            <div class="section-label">STOREFRONT &amp; POLICY GOVERNANCE</div>
+                            <h3>Merchant Parameters &amp; Pricing Floor</h3>
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <span class="dashboard-live-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">● Cloud SQL (asia-southeast1)</span>
-                            <span class="dashboard-live-badge" id="configSaveStatus">Ready</span>
+                            <span class="dashboard-live-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">Active Enclave</span>
+                            <span class="dashboard-live-badge" id="configSaveStatus">Synchronized</span>
                         </div>
                     </div>
 
@@ -408,16 +426,24 @@
                             <input class="merchant-input" id="inputStoreDomain" type="text" value="https://shop.workspacetech.in" placeholder="e.g. https://yourstore.myshopify.com" />
                         </div>
                         <div class="merchant-input-group">
-                            <label for="inputPlatform">Platform</label>
+                            <label for="inputPlatform">Platform Connector</label>
                             <select class="merchant-input" id="inputPlatform">
                                 <option value="shopify">Shopify Storefront</option>
                                 <option value="woocommerce">WooCommerce REST API</option>
-                                <option value="custom_catalog">Custom Cloud Catalog</option>
+                                <option value="custom_catalog">Enterprise Catalog</option>
                             </select>
                         </div>
                         <div class="merchant-input-group">
                             <label for="inputFloorPrice">Policy Floor (INR)</label>
                             <input class="merchant-input" id="inputFloorPrice" type="number" step="100" min="500" value="4500" placeholder="e.g. 4500" />
+                        </div>
+                        <div class="merchant-input-group">
+                            <label for="inputRazorpayKey">Razorpay Key ID</label>
+                            <input class="merchant-input" id="inputRazorpayKey" type="text" value="" placeholder="rzp_test_..." />
+                        </div>
+                        <div class="merchant-input-group">
+                            <label for="inputWhatsAppPhone">WhatsApp Phone ID</label>
+                            <input class="merchant-input" id="inputWhatsAppPhone" type="text" placeholder="e.g. 104829104829104" />
                         </div>
                         <div class="merchant-input-group" style="justify-content: flex-end;">
                             <label>&nbsp;</label>
@@ -426,25 +452,6 @@
                             </button>
                         </div>
                     </form>
-
-                    <!-- Real Startup Channel Integrations Status -->
-                    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;">
-                            <div style="font-size: 11px; color: var(--muted);">DATABASE PERSISTENCE</div>
-                            <div style="font-weight: 600; font-size: 13px; color: #10b981; margin-top: 2px;">PostgreSQL Active</div>
-                            <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Orders & logs saved permanently</div>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;">
-                            <div style="font-size: 11px; color: var(--muted);">META WHATSAPP API</div>
-                            <div style="font-weight: 600; font-size: 13px; color: #3b82f6; margin-top: 2px;">Webhook /api/channels/whatsapp</div>
-                            <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Supports Meta Graph verification</div>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;">
-                            <div style="font-size: 11px; color: var(--muted);">SHOPIFY COMMERCE</div>
-                            <div style="font-weight: 600; font-size: 13px; color: #8b5cf6; margin-top: 2px;">Live Ingestion Ready</div>
-                            <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Real-time inventory sync</div>
-                        </div>
-                    </div>
                 </div>
 
 
@@ -601,7 +608,7 @@
 
                         <div>
                             <div class="section-label">
-                                PRODUCT CATALOG
+                                PRODUCT CATALOG & INVENTORY MANAGEMENT
                             </div>
 
                             <h3>
@@ -609,13 +616,53 @@
                             </h3>
                         </div>
 
-                        <span
-                            class="dashboard-count"
-                            id="dashboardCatalogCount"
-                        >
-                            0 products
-                        </span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button id="openAddProductModalBtn" class="button secondary" type="button" style="padding: 6px 12px; font-size: 12px;">
+                                ＋ Add Product
+                            </button>
+                            <span
+                                class="dashboard-count"
+                                id="dashboardCatalogCount"
+                            >
+                                0 products
+                            </span>
+                        </div>
 
+                    </div>
+
+                    <!-- Inline Add Product Form (Collapsible) -->
+                    <div id="addProductCard" style="display: none; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="font-weight: 600; font-size: 13px; color: var(--accent);">Create or Update Catalog Item</div>
+                            <span style="font-size: 11px; color: var(--muted);">Cloud SQL Synchronized</span>
+                        </div>
+                        <div id="addProductNotice" style="display: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 12px;"></div>
+                        <div class="merchant-form-grid" style="margin-bottom: 8px;">
+                            <div class="merchant-input-group">
+                                <label for="inputNewProdId">SKU / Product ID</label>
+                                <input class="merchant-input" id="inputNewProdId" placeholder="e.g. DESK_01" />
+                            </div>
+                            <div class="merchant-input-group">
+                                <label for="inputNewProdName">Product Title</label>
+                                <input class="merchant-input" id="inputNewProdName" placeholder="e.g. Ergonomic Office Chair" />
+                            </div>
+                            <div class="merchant-input-group">
+                                <label for="inputNewProdCategory">Category</label>
+                                <input class="merchant-input" id="inputNewProdCategory" placeholder="e.g. Furniture" />
+                            </div>
+                            <div class="merchant-input-group">
+                                <label for="inputNewProdPrice">Price (INR)</label>
+                                <input class="merchant-input" id="inputNewProdPrice" type="number" placeholder="e.g. 5999" />
+                            </div>
+                            <div class="merchant-input-group">
+                                <label for="inputNewProdStock">Stock Count</label>
+                                <input class="merchant-input" id="inputNewProdStock" type="number" value="25" />
+                            </div>
+                            <div class="merchant-input-group" style="justify-content: flex-end; flex-direction: row; gap: 8px;">
+                                <button class="button" id="cancelAddProdBtn" type="button" style="padding: 8px 12px;">Cancel</button>
+                                <button class="button primary" id="saveNewProdBtn" type="button" style="padding: 8px 14px;">Save to Catalog</button>
+                            </div>
+                        </div>
                     </div>
 
                     <div
@@ -627,6 +674,76 @@
                         </div>
                     </div>
 
+                </div>
+
+                <!-- Cloud SQL Real-Time Financial Policy & Cryptographic Audit Logs -->
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <div class="section-label">CLOUD SQL SECURITY & AUDIT TRAIL</div>
+                            <h3>PostgreSQL Policy Interceptions & Cryptographic Decisions</h3>
+                        </div>
+                        <span class="dashboard-live-badge" style="color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            ● Real-Time Relational Stream
+                        </span>
+                    </div>
+
+                    <div style="overflow-x: auto; margin-top: 8px;">
+                        <table id="cloudSqlAuditTable" style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border); color: var(--muted);">
+                                    <th style="padding: 8px;">TIMESTAMP</th>
+                                    <th style="padding: 8px;">EVENT / ACTION</th>
+                                    <th style="padding: 8px;">OFFERED</th>
+                                    <th style="padding: 8px;">POLICY FLOOR</th>
+                                    <th style="padding: 8px;">RESULT</th>
+                                    <th style="padding: 8px;">DECISION PROOF HASH</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cloudSqlAuditBody">
+                                <tr>
+                                    <td colspan="6" style="padding: 16px; text-align: center; color: var(--muted);">
+                                        Loading cryptographic audit trail from Cloud SQL...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Outbound Payment Dispatch Simulator -->
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <div class="section-label">WHATSAPP COMMERCE OUTBOUND DISPATCH</div>
+                            <h3>Send Instant Razorpay Payment Link to Customer</h3>
+                        </div>
+                        <span class="dashboard-live-badge" style="color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            Zero-Cost ($0.00)
+                        </span>
+                    </div>
+
+                    <div class="merchant-form-grid" style="margin-top: 10px;">
+                        <div class="merchant-input-group">
+                            <label for="inputDispatchPhone">Customer WhatsApp (+Phone)</label>
+                            <input class="merchant-input" id="inputDispatchPhone" placeholder="+919876543210" />
+                        </div>
+                        <div class="merchant-input-group">
+                            <label for="inputDispatchItem">Item / Bundle Description</label>
+                            <input class="merchant-input" id="inputDispatchItem" value="Work & Focus Audio Bundle" />
+                        </div>
+                        <div class="merchant-input-group">
+                            <label for="inputDispatchPrice">Approved Price (INR)</label>
+                            <input class="merchant-input" id="inputDispatchPrice" type="number" value="6500" />
+                        </div>
+                        <div class="merchant-input-group" style="justify-content: flex-end;">
+                            <label>&nbsp;</label>
+                            <button class="button primary" id="sendWhatsAppLinkBtn" type="button" style="padding: 10px 16px;">
+                                💬 Dispatch Payment Link
+                            </button>
+                        </div>
+                    </div>
+                    <div id="dispatchResultNotice" style="margin-top: 10px; font-size: 12px; display: none;"></div>
                 </div>
 
 
@@ -781,163 +898,77 @@
                         </div>
 
                         <div>
-
-                            <strong>
-                                Intent → Contract
-                            </strong>
-
-                            <span>
-                                Understand + constrain
-                            </span>
-
+                            <strong>Intent &amp; Constraints</strong>
+                            <span>Semantic goal extraction</span>
                         </div>
-
                     </div>
-
 
                     <div class="pipeline-line"></div>
 
-
-                    <div
-                        class="pipeline-step"
-                        id="pipelinePolicy"
-                    >
-
-                        <div class="pipeline-number">
-                            02
-                        </div>
-
+                    <div class="pipeline-step" id="pipelinePolicy">
+                        <div class="pipeline-number">02</div>
                         <div>
-
-                            <strong>
-                                AI Policy
-                            </strong>
-
-                            <span>
-                                Merchant rules
-                            </span>
-
+                            <strong>Financial Enclave</strong>
+                            <span>Multi-agent policy consensus</span>
                         </div>
-
                     </div>
-
 
                     <div class="pipeline-line"></div>
 
-
-                    <div
-                        class="pipeline-step"
-                        id="pipelineApproval"
-                    >
-
-                        <div class="pipeline-number">
-                            03
-                        </div>
-
+                    <div class="pipeline-step" id="pipelineApproval">
+                        <div class="pipeline-number">03</div>
                         <div>
-
-                            <strong>
-                                Human Approval
-                            </strong>
-
-                            <span>
-                                Customer stays in control
-                            </span>
-
+                            <strong>Customer Approval</strong>
+                            <span>Human-in-the-loop signoff</span>
                         </div>
-
                     </div>
-
 
                     <div class="pipeline-line"></div>
 
-
-                    <div
-                        class="pipeline-step"
-                        id="pipelinePayment"
-                    >
-
-                        <div class="pipeline-number">
-                            04
-                        </div>
-
+                    <div class="pipeline-step" id="pipelinePayment">
+                        <div class="pipeline-number">04</div>
                         <div>
-
-                            <strong>
-                                Payment → Verify
-                            </strong>
-
-                            <span>
-                                Razorpay + server verification
-                            </span>
-
+                            <strong>Settlement &amp; Audit</strong>
+                            <span>Razorpay gateway &amp; ledger</span>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-            <!-- Financial Firewall Status & Matrix -->
+            <!-- Policy Floor & Margin Security -->
             <div class="control-section" style="margin-top: 14px;">
                 <div class="section-label" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>FINANCIAL FIREWALL</span>
-                    <span style="background: rgba(255, 107, 107, 0.15); color: #ff8585; border: 1px solid rgba(255, 107, 107, 0.3); padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 700;">FLOOR: ₹4,500</span>
+                    <span>MARGIN PROTECTION</span>
+                    <span id="sideFloorBadge" style="background: var(--success-soft); color: var(--success); border: 1px solid var(--success-border); padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;">ACTIVE</span>
                 </div>
 
-                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; font-size: 12px; margin-top: 8px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: #94a3b8;">Floor Interception:</span>
-                        <span style="color: #ff8585; font-weight: 600;">&lt; ₹4,500.00 INR</span>
+                <div style="background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; font-size: 12px; margin-top: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--muted); font-weight: 600;">Corporate Floor:</span>
+                        <strong id="sideFloorAmount" style="color: var(--text); font-size: 13px;">₹4,500.00 INR</strong>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: #94a3b8;">Text Suppression:</span>
-                        <span style="color: #9cff5b; font-weight: 600;">Enforced (Zero UI)</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--muted); font-weight: 600;">Quorum Governance:</span>
+                        <span style="color: var(--success); font-weight: 700;">3/3 Multi-Agent</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: #94a3b8;">Tool Route:</span>
-                        <code style="color: #93c5fd; font-size: 11px;">generate_secure_checkout</code>
-                    </div>
-
-                    <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px; margin-top: 8px;">
-                        <div style="font-size: 10px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.05em; margin-bottom: 6px;">
-                            AUTHORIZED ASSET PAYLOAD:
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-                            <span>• Work &amp; Focus Audio</span>
-                            <strong style="color: #9cff5b;">₹6,500.00</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px;">
-                            <span>• Developer Complete</span>
-                            <strong style="color: #9cff5b;">₹51,500.00</strong>
-                        </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--muted); font-weight: 600;">Enforcement:</span>
+                        <span style="color: var(--accent); font-weight: 700;">Deterministic Enclave</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Real-time Structured Tool Stream Output -->
-            <div class="control-section" style="margin-top: 14px;">
-                <div class="section-label">
-                    STRUCTURED DATA STREAM
-                </div>
-                <pre id="liveToolStream" style="background: #080b12; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; color: #a5b4fc; max-height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin: 8px 0 0 0;">// Awaiting orchestrator event...</pre>
-            </div>
+            <!-- Hidden stream buffer for compatibility -->
+            <div id="liveToolStream" class="hidden"></div>
 
             <!-- Trust -->
-
-            <div class="trust-box">
-
+            <div class="trust-box" style="margin-top: 16px;">
                 <div class="trust-title">
-                    🔐 You stay in control
+                    🛡️ Zero-Trust Autonomous Guard
                 </div>
-
                 <p>
-                    The AI can prepare a purchase,
-                    but it cannot authorize payment
-                    without your explicit approval.
+                    Every negotiated contract requires deterministic policy verification and explicit customer authorization prior to fund transfer.
                 </p>
-
             </div>
 
         </aside>
@@ -1071,13 +1102,123 @@
 
 
     <!-- =========================================
+         ORDER INVOICE / RECEIPT MODAL
+    ========================================== -->
+    <div
+        class="invoice-overlay hidden"
+        id="invoiceModal"
+    >
+        <div class="invoice-modal">
+            <button
+                class="modal-close"
+                id="closeInvoiceModal"
+                type="button"
+            >
+                ×
+            </button>
+
+            <div class="invoice-header-grid">
+                <div>
+                    <div class="eyebrow" id="invoiceStoreTag">OFFICIAL INVOICE</div>
+                    <h2 id="invoiceStoreName" style="font-size: 20px; margin-top: 4px; color: var(--text);">AI Commerce Store</h2>
+                    <p id="invoiceStoreDomain" style="font-size: 11px; color: var(--muted); margin-top: 2px;">store.demo.com</p>
+                </div>
+                <div style="text-align: right;">
+                    <div class="order-badge-verified">PAID & VERIFIED</div>
+                    <div id="invoiceNumber" style="font-size: 12px; font-weight: 700; margin-top: 6px; color: var(--text);">INV-001</div>
+                    <div id="invoiceDate" style="font-size: 11px; color: var(--muted); margin-top: 2px;">Date</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 16px; padding: 12px; background: var(--panel-2); border-radius: 8px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--muted);">
+                    <span>Order ID: <strong id="invoiceOrderId" style="color: var(--text);"></strong></span>
+                    <span>Payment ID: <strong id="invoicePaymentId" style="color: var(--text);"></strong></span>
+                </div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                    <span>Buyer / Customer: <strong id="invoiceBuyerId" style="color: var(--text);"></strong></span>
+                </div>
+            </div>
+
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceTableBody">
+                    <!-- Dynamic Line Items -->
+                </tbody>
+            </table>
+
+            <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 11px; color: var(--muted);">
+                    Tax Breakdown: 18% GST Included • Razorpay Verified
+                </div>
+                <div style="font-size: 18px; font-weight: 800; color: var(--accent);" id="invoiceTotalAmount">
+                    ₹0.00
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 24px;">
+                <button
+                    class="button secondary"
+                    id="invoicePrintBtn"
+                    style="flex: 1;"
+                    type="button"
+                >
+                    🖨️ Print / Save PDF
+                </button>
+                <button
+                    class="button primary"
+                    id="invoiceDownloadTextBtn"
+                    style="flex: 1;"
+                    type="button"
+                >
+                    ⤓ Download Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =========================================
+         DELETE ORDER CONFIRMATION MODAL
+    ========================================== -->
+    <div class="modal-overlay hidden" id="deleteOrderConfirmModal">
+        <div class="approval-modal" style="max-width: 440px;">
+            <button class="modal-close" id="closeDeleteModal" type="button">×</button>
+            <div class="modal-icon" style="background: var(--danger-soft); color: var(--danger); border: 1px solid var(--danger-border);">
+                🗑️
+            </div>
+            <h2>Delete Order Record</h2>
+            <p class="modal-description" style="margin-top: 8px;">
+                Are you sure you want to permanently delete order <strong id="deleteOrderModalId" style="color: var(--text);">#Order</strong>?
+            </p>
+            <div style="background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 16px; font-size: 13px; color: var(--muted); line-height: 1.5;">
+                ⚠️ This will permanently remove the verified transaction, payment reference, and invoice from your ledger records.
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="button secondary" id="cancelDeleteOrderBtn" type="button">Cancel</button>
+                <button class="button" id="confirmDeleteOrderBtn" type="button" style="background: var(--danger); color: #ffffff; font-weight: 700;">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="app-toast-container" id="appToastContainer"></div>
+
+
+    <!-- =========================================
          RAZORPAY CHECKOUT
     ========================================== -->
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
-        window.RAZORPAY_KEY_ID = "rzp_test_TUi28O8V9GShpw";
+        window.RAZORPAY_KEY_ID = window.RAZORPAY_KEY_ID || "";
     </script>
 
 
