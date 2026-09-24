@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -70,6 +70,28 @@
                 >
                     <span>◷</span>
                     Orders
+                </button>
+
+                <button
+                    class="nav-item"
+                    id="cartButton"
+                    type="button"
+                    style="display: flex; justify-content: space-between; align-items: center;"
+                >
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>🛒</span>
+                        Cart
+                    </div>
+                    <span id="navCartBadge" style="background: var(--accent); color: #ffffff; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; display: none;">0</span>
+                </button>
+
+                <button
+                    class="nav-item"
+                    id="whatsappNavButton"
+                    type="button"
+                >
+                    <span>💬</span>
+                    WhatsApp Commerce
                 </button>
 
                 <button
@@ -189,18 +211,44 @@
                         ✦ Autonomous Commerce Concierge
                     </div>
 
+                    <!-- Cart Unfinished Payment Quick Resumption Banner -->
+                    <div
+                        id="welcomeCartBanner"
+                        class="hidden"
+                        style="margin: 16px auto 20px auto; max-width: 640px; padding: 14px 18px; background: rgba(99, 102, 241, 0.1); border: 1.5px solid rgba(99, 102, 241, 0.4); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 14px; text-align: left; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.08);"
+                    >
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 24px;">🛒</span>
+                            <div>
+                                <div style="font-weight: 700; font-size: 13.5px; color: var(--text); display: flex; align-items: center; gap: 6px;">
+                                    <span>Unfinished Order in Shopping Cart</span>
+                                    <span id="welcomeCartBadgeCount" style="background: var(--accent); color: #fff; font-size: 11px; padding: 2px 7px; border-radius: 999px;">1 item</span>
+                                </div>
+                                <div id="welcomeCartItemsSummary" style="font-size: 12px; color: var(--muted); margin-top: 2px;">
+                                    Items from your previous session are waiting safely for checkout.
+                                </div>
+                            </div>
+                        </div>
+                        <button
+                            id="welcomeOpenCartBtn"
+                            class="button primary"
+                            type="button"
+                            style="padding: 8px 14px; font-size: 12px; white-space: nowrap; font-weight: 600;"
+                        >
+                            Open Cart &amp; Pay Now →
+                        </button>
+                    </div>
+
                     <h2>
-                        Curated Hardware &amp;
+                        Enterprise Hardware &amp;
                         <span>Workspace Solutions.</span>
                     </h2>
 
                     <p>
-                        Describe your requirements, preferred peripherals, or budget. The autonomous orchestrator evaluates stock, enforces merchant margin policies, and prepares instant pre-authorized checkout contracts.
+                        Describe your setup requirements, budget, or commercial specs. Our autonomous multi-agent orchestrator validates real-time inventory, calculates optimal bundle pricing, and secures instant intent contracts.
                     </p>
 
-
                     <!-- Suggestion cards -->
-
                     <div class="suggestions">
 
                         <button
@@ -326,6 +374,17 @@
                 </div>
 
 
+                <!-- Orders Search & Filter Bar -->
+                <div class="orders-filter-bar" style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+                    <div style="flex: 1; min-width: 240px; position: relative;">
+                        <input type="text" id="ordersSearchInput" placeholder="🔍 Search orders by ID, product name, or payment ref..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 13px;" />
+                    </div>
+                    <div class="orders-status-filters" id="ordersStatusFilters" style="display: flex; gap: 6px;">
+                        <button type="button" class="button secondary active order-filter-btn" data-status="all" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">All Orders</button>
+                        <button type="button" class="button secondary order-filter-btn" data-status="verified" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">Paid &amp; Shipped</button>
+                    </div>
+                </div>
+
                 <div
                     class="dashboard-panel"
                     id="ordersList"
@@ -335,6 +394,452 @@
                     </div>
                 </div>
 
+            </section>
+
+
+            <!-- =================================
+                 MULTI-ITEM CART DASHBOARD
+            ================================== -->
+            <section
+                class="merchant-dashboard hidden"
+                id="cartDashboard"
+            >
+                <div class="dashboard-header">
+                    <div>
+                        <div class="eyebrow">
+                            MULTI-ITEM CART &amp; PERSISTENT BASKET
+                        </div>
+                        <h2>
+                            Shopping <span>Cart.</span>
+                        </h2>
+                        <p>
+                            Curate multiple products, configure delivery pincode, enjoy automatic bundle discounts, and keep your selected items safe even if checkout is paused or payment does not proceed.
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                            <span>🛡️</span> <span>Item Protection Active</span>
+                        </span>
+                        <button
+                            class="button secondary"
+                            id="clearCartButton"
+                            type="button"
+                        >
+                            🗑️ Empty Cart
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cart Safe Retention Banner -->
+                <div id="cartRetentionNotice" style="margin-bottom: 16px; padding: 10px 14px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-sm); font-size: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                    <span style="display: flex; align-items: center; gap: 8px; color: var(--text);">
+                        <span style="font-size: 15px;">🔒</span>
+                        <span><strong>Basket Safe Holding:</strong> If payment is closed, cancelled, or does not proceed, your selected items remain safely in this cart ready for checkout whenever you wish.</span>
+                    </span>
+                    <span style="font-size: 11px; color: var(--accent); font-weight: 600;">Auto-Saved</span>
+                </div>
+
+                <div class="cart-grid" style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start;">
+                    <!-- Cart Items Column -->
+                    <div class="dashboard-panel" id="cartItemsContainer" style="padding: 20px;">
+                        <div class="dashboard-empty">
+                            Your shopping cart is empty. Browse products or ask the AI Concierge to recommend gear!
+                        </div>
+                    </div>
+
+                    <!-- Cart Summary & Checkout Column -->
+                    <div class="dashboard-panel" style="padding: 20px;">
+                        <div class="section-label">ORDER SUMMARY</div>
+                        <h3 style="margin-top: 4px; font-size: 18px;">Price Breakdown</h3>
+
+                        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+                            <div style="display: flex; justify-content: space-between; color: var(--muted);">
+                                <span>Subtotal (<span id="cartSummaryCount">0</span> items)</span>
+                                <strong id="cartSummarySubtotal" style="color: var(--text);">₹0</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: var(--success); display: none;" id="cartDiscountRow">
+                                <span id="cartDiscountLabel">Bundle Discount</span>
+                                <strong id="cartDiscountAmount">-₹0</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: var(--muted);">
+                                <span>Express Delivery</span>
+                                <span style="color: var(--success); font-weight: 600;">FREE</span>
+                            </div>
+                            <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 6px; display: flex; justify-content: space-between; font-size: 16px;">
+                                <strong style="color: var(--text);">Total Amount</strong>
+                                <strong id="cartSummaryTotal" style="color: var(--accent); font-size: 18px;">₹0</strong>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Pincode Checker -->
+                        <div style="margin-top: 20px; padding: 12px; background: var(--panel-2); border-radius: 8px; border: 1px solid var(--border);">
+                            <label style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 6px;">Check Delivery Pincode</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="cartPincodeInput" maxlength="6" placeholder="e.g. 560001" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 13px;" />
+                                <button type="button" id="cartCheckPincodeBtn" class="button secondary" style="padding: 6px 12px; font-size: 12px;">Check</button>
+                            </div>
+                            <div id="cartPincodeResult" style="font-size: 11px; margin-top: 8px; line-height: 1.4; color: var(--muted); display: none;"></div>
+                        </div>
+
+                        <button
+                            class="button primary"
+                            id="cartCheckoutBtn"
+                            type="button"
+                            style="width: 100%; margin-top: 20px; padding: 12px; font-size: 14px; font-weight: 700; justify-content: center;"
+                        >
+                            Proceed to Autonomous Checkout →
+                        </button>
+
+                        <!-- Educational Banner: Why Use Shopping Cart vs Chat Shopping -->
+                        <div style="margin-top: 18px; padding: 14px; background: rgba(59, 130, 246, 0.08); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.25); font-size: 11.5px; line-height: 1.45;">
+                            <div style="font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                                <span>💡</span>
+                                <span>Why use Cart vs direct Chat Shopping?</span>
+                            </div>
+                            <ul style="margin: 0; padding-left: 16px; color: var(--muted); display: flex; flex-direction: column; gap: 6px;">
+                                <li><strong style="color: var(--text);">Safe Basket Retention</strong>: If payment is not proceeded, cancelled, or fails, all your selected items stay safe in this cart so you never have to select them again.</li>
+                                <li><strong style="color: var(--text);">Multi-Item Bundles</strong>: Chat handles 1 item at a time; the Cart lets you combine multiple hardware items into 1 single transaction.</li>
+                                <li><strong style="color: var(--text);">Volume Discounts</strong>: Auto-unlock 5% discount for 2 items, 10% discount for 3+ items.</li>
+                                <li><strong style="color: var(--text);">Consolidated GST Invoice</strong>: 1 single official invoice for your whole purchase.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick-Add Hardware Shelf -->
+                <div class="cart-catalog-shelf" style="margin-top: 32px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <div class="section-label">AVAILABLE STOREFRONT INVENTORY</div>
+                            <h3 style="font-size: 16px; font-weight: 700; color: var(--text); margin-top: 2px;">Add Curated Hardware to Cart</h3>
+                        </div>
+                        <span style="font-size: 11.5px; color: var(--accent); background: var(--accent-soft); padding: 4px 12px; border-radius: 999px; border: 1px solid var(--accent-border); font-weight: 600;">
+                            ✨ Multi-item orders get bundle discounts
+                        </span>
+                    </div>
+                    <div class="cart-shelf-grid" id="cartCatalogShelfGrid">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- =================================
+                 WHATSAPP COMMERCE SIMULATOR VIEW
+            ================================== -->
+            <section
+                class="merchant-dashboard hidden"
+                id="whatsappView"
+            >
+                <div class="dashboard-header">
+                    <div>
+                        <div class="eyebrow" style="color: #22c55e; display: flex; align-items: center; gap: 6px;">
+                            <span>META GRAPH CLOUD API v20.0</span>
+                            <span style="font-size: 10px; background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.3); font-weight: 700;">LIVE WEBHOOK READY</span>
+                        </div>
+                        <h2>
+                            WhatsApp Commerce
+                            <span>sandbox.</span>
+                        </h2>
+                        <p>
+                            Simulate conversational sales, multi-lingual Hinglish bargaining, voice notes, and instant Razorpay UPI checkout inside WhatsApp.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button
+                            type="button"
+                            class="button secondary"
+                            id="waResetChatBtn"
+                            style="font-size: 12px; padding: 7px 12px;"
+                            title="Reset WhatsApp chat history"
+                        >
+                            ↻ Reset Chat
+                        </button>
+                        <span class="dashboard-live-badge" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            ● Meta Graph Active (18ms)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="whatsapp-grid">
+                    <!-- Mobile Device Frame -->
+                    <div class="whatsapp-phone-frame">
+                        <!-- Top Phone Bezel & iOS / Android Status Bar -->
+                        <div class="wa-status-bar">
+                            <span style="letter-spacing: -0.2px;">09:41</span>
+                            <div class="wa-dynamic-island">
+                                <span class="wa-sensor-dot"></span>
+                                <span class="wa-camera-lens"></span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px; font-size: 10.5px;">
+                                <span>5G</span>
+                                <span>📶</span>
+                                <span>🔋 98%</span>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Header -->
+                        <div style="background: #075e54; color: #ffffff; padding: 8px 12px; border-radius: 16px 16px 0 0; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 16px; cursor: pointer; opacity: 0.85;">←</span>
+                                <div style="position: relative; width: 34px; height: 34px; border-radius: 50%; background: #128c7e; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+                                    🛍️
+                                    <span style="position: absolute; bottom: 0; right: 0; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; border: 1.5px solid #075e54;"></span>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13px; line-height: 1.2; display: flex; align-items: center; gap: 4px;">
+                                        Workspace AI Store
+                                        <span title="Meta Verified Business Account" style="color: #25d366; font-size: 11px; font-weight: 900;">✓</span>
+                                    </div>
+                                    <div style="font-size: 10px; color: #a7f3d0;">online • replies instantly</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; font-size: 15px; opacity: 0.9; align-items: center;">
+                                <span title="Simulate Video Call" style="cursor: pointer;">📹</span>
+                                <span title="Simulate Voice Call" style="cursor: pointer;">📞</span>
+                                <span title="Chat Menu" style="cursor: pointer;">⋮</span>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Chat Canvas with authentic Wallpaper -->
+                        <div id="waChatCanvas" class="wa-chat-wallpaper" style="height: 410px; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; border-left: 1px solid #1f2c34; border-right: 1px solid #1f2c34;">
+                            <!-- Encryption notice pill -->
+                            <div class="wa-encryption-banner">
+                                🔒 Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp or Meta, can read or listen to them.
+                            </div>
+
+                            <!-- Date pill -->
+                            <div class="wa-date-badge">TODAY</div>
+
+                            <!-- Seed welcome message -->
+                            <div style="background: #202c33; color: #e9edef; padding: 10px 12px; border-radius: 8px 8px 8px 0; max-width: 86%; align-self: flex-start; line-height: 1.45; box-shadow: 0 1px 2px rgba(0,0,0,0.35);">
+                                👋 <strong>Welcome to Workspace &amp; Audio Tech!</strong><br><br>
+                                I am your autonomous WhatsApp sales concierge. You can ask for gear specs, negotiate commercial discounts, or purchase instantly with official Razorpay links.<br><br>
+                                <em>Tip: Ask in English, Hindi, or Hinglish (e.g., "Bhaiya headphone pe discount milega?")</em>
+                                <span style="font-size: 9.5px; color: #8696a0; float: right; margin-top: 4px;">10:00 AM ✓✓</span>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Input Bar -->
+                        <div style="background: #202c33; padding: 8px 10px; border-radius: 0 0 24px 24px; display: flex; gap: 6px; align-items: center;">
+                            <button
+                                type="button"
+                                id="waEmojiBtn"
+                                title="Insert Emoji"
+                                style="background: transparent; border: none; font-size: 17px; cursor: pointer; padding: 0 2px;"
+                            >
+                                😊
+                            </button>
+                            <button
+                                type="button"
+                                id="waAttachBtn"
+                                title="Attach catalog or media"
+                                style="background: transparent; border: none; font-size: 17px; cursor: pointer; padding: 0 2px; color: #8696a0;"
+                            >
+                                📎
+                            </button>
+                            <input
+                                type="text"
+                                id="waInputMessage"
+                                placeholder="Type a message or negotiate..."
+                                style="flex: 1; background: #2a3942; border: none; color: #d1d7db; padding: 8px 12px; border-radius: 20px; font-size: 12px; outline: none;"
+                            />
+                            <button
+                                type="button"
+                                id="waVoiceBtn"
+                                title="Send simulated voice note"
+                                style="background: #1f2c34; color: #25d366; border: 1px solid rgba(37, 211, 102, 0.4); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: transform 0.15s ease;"
+                            >
+                                🎙️
+                            </button>
+                            <button
+                                type="button"
+                                id="waSendBtn"
+                                style="background: #00a884; color: #ffffff; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;"
+                            >
+                                ➤
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sandbox Controls, Scenarios & Webhook Inspector -->
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Tab Selector -->
+                        <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                            <button type="button" class="wa-tab-btn active" id="waTabScenariosBtn">
+                                💬 Quick Scenarios
+                            </button>
+                            <button type="button" class="wa-tab-btn" id="waTabWebhookBtn">
+                                ⚡ Meta Webhook Inspector
+                            </button>
+                            <button type="button" class="wa-tab-btn" id="waTabDirectBtn">
+                                📲 Real wa.me Dispatch
+                            </button>
+                        </div>
+
+                        <!-- Tab 1: Scenarios -->
+                        <div id="waTabScenarios" class="dashboard-panel" style="padding: 16px;">
+                            <div class="section-label">INTERACTIVE SIMULATION SCENARIOS</div>
+                            <h3 style="margin-top: 4px; font-size: 16px;">Test Real-World Customer Journeys</h3>
+                            <p style="font-size: 12px; color: var(--muted); margin-top: 4px;">Click any scenario chip below to instantly simulate incoming messages from WhatsApp to our autonomous engine:</p>
+
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+                                <!-- Group 1: Catalog & Recommendations -->
+                                <div>
+                                    <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 4px;">🛍️ Product Discovery &amp; Inventory</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <button type="button" class="button secondary wa-quick-prompt" data-text="What developer laptops do you have in stock?" style="font-size: 11.5px; padding: 6px 11px;">
+                                            💻 "What developer laptops do you have in stock?"
+                                        </button>
+                                        <button type="button" class="button secondary wa-quick-prompt" data-text="Show me headphones under 10000 with ANC" style="font-size: 11.5px; padding: 6px 11px;">
+                                            🎧 "Show me headphones under 10000 with ANC"
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Group 2: Hinglish Negotiation -->
+                                <div>
+                                    <div style="font-size: 11px; font-weight: 700; color: #f59e0b; text-transform: uppercase; margin-bottom: 4px;">🇮🇳 Hinglish Bargaining &amp; Margin Rules</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <button type="button" class="button secondary wa-quick-prompt" data-text="Bhaiya, ProBook laptop pe thoda discount milega kya?" style="font-size: 11.5px; padding: 6px 11px; border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24;">
+                                            🏷️ "Bhaiya, ProBook laptop pe thoda discount milega kya?"
+                                        </button>
+                                        <button type="button" class="button secondary wa-quick-prompt" data-text="SoundMax headphone pe 5% discount de do abhi order karunga" style="font-size: 11.5px; padding: 6px 11px; border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24;">
+                                            🤝 "SoundMax headphone pe 5% discount de do abhi order karunga"
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Group 3: Voice Note Commerce -->
+                                <div>
+                                    <div style="font-size: 11px; font-weight: 700; color: #22c55e; text-transform: uppercase; margin-bottom: 4px;">🎙️ Audio Voice Note Shopping</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <button type="button" class="button secondary wa-quick-prompt" data-text="Bhaiya SoundMax headphones chahiye best offer batao" data-voice="true" style="font-size: 11.5px; padding: 6px 11px; border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80;">
+                                            🎙️ Voice Note (0:08): "Bhaiya SoundMax headphones chahiye best offer batao"
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Group 4: Instant UPI Checkout & Orders -->
+                                <div>
+                                    <div style="font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; margin-bottom: 4px;">⚡ Instant Payment &amp; Order Tracking</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <button type="button" class="button secondary wa-quick-prompt" data-text="Send me payment link for Developer Complete Suite" style="font-size: 11.5px; padding: 6px 11px; border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8;">
+                                            ⚡ "Send me payment link for Developer Complete Suite"
+                                        </button>
+                                        <button type="button" class="button secondary wa-quick-prompt" data-text="Where is my order #order_d998b5cb429f9d37?" style="font-size: 11.5px; padding: 6px 11px; border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399;">
+                                            📦 "Where is my order #order_d998b5cb429f9d37?"
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Meta Webhook Inspector -->
+                        <div id="waTabWebhook" class="dashboard-panel hidden" style="padding: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div class="section-label">GRAPH API TELEMETRY</div>
+                                    <h3 style="margin-top: 2px; font-size: 16px;">Meta Cloud API Payload Stream</h3>
+                                </div>
+                                <span style="font-size: 11px; font-family: monospace; background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 2px 8px; border-radius: 4px;">POST /api/channels/whatsapp (200 OK)</span>
+                            </div>
+                            <p style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+                                Live payload serialized according to Meta WhatsApp Cloud API specifications:
+                            </p>
+                            <pre id="waWebhookPayloadBox" style="margin-top: 10px; background: #0b141a; border: 1px solid #1f2c34; border-radius: 8px; padding: 12px; color: #38bdf8; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; max-height: 280px; overflow-y: auto; white-space: pre-wrap;">{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "WABA_902184912093",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "15550239999",
+              "phone_number_id": "100609349424911"
+            },
+            "contacts": [
+              {
+                "profile": { "name": "Customer" },
+                "wa_id": "919876543210"
+              }
+            ],
+            "messages": [
+              {
+                "from": "919876543210",
+                "id": "wamid.HBgLMzkxOTg3NjU0MzIxMB...",
+                "timestamp": "1727170288",
+                "text": { "body": "Bhaiya SoundMax headphones pe discount milega?" },
+                "type": "text"
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}</pre>
+                        </div>
+
+                        <!-- Tab 3: Real wa.me Dispatch -->
+                        <div id="waTabDirect" class="dashboard-panel hidden" style="padding: 16px;">
+                            <div class="section-label">DIRECT OUTBOUND COMMERCE</div>
+                            <h3 style="margin-top: 4px; font-size: 16px;">Send Directly to Customer WhatsApp</h3>
+                            <p style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+                                Dispatches pre-negotiated commercial deals and 1-tap Razorpay payment links directly to the customer's phone number without extra redirects:
+                            </p>
+
+                            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
+                                <div>
+                                    <label style="font-size: 11px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Recipient Mobile Number</label>
+                                    <input
+                                        type="tel"
+                                        id="waDirectPhoneInput"
+                                        value="+919341092641"
+                                        placeholder="+91 93410 92641"
+                                        style="width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 13px;"
+                                    />
+                                    <span style="font-size: 10.5px; color: var(--muted); margin-top: 3px; display: block;">10-digit Indian numbers automatically format to +91.</span>
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Select Pre-Approved Deal</label>
+                                    <select id="waDirectDealSelect" style="width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 13px;">
+                                        <option value="ProBook Ultra 14 Laptop|41400|8">ProBook Ultra 14 Laptop (₹41,400 INR • 8% Discount)</option>
+                                        <option value="SoundMax ANC Headphones|7820|8">SoundMax ANC Headphones (₹7,820 INR • 8% Discount)</option>
+                                        <option value="Precision Ergonomic Mouse|2944|8">Precision Ergonomic Mouse (₹2,944 INR • 8% Discount)</option>
+                                        <option value="Work & Focus Audio Bundle|5980|8">Work & Focus Audio Bundle (₹5,980 INR • 8% Discount)</option>
+                                    </select>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="button primary"
+                                    id="waDirectDispatchBtn"
+                                    style="background: #25d366; border-color: #25d366; color: #000; font-weight: 700; justify-content: center; font-size: 13px; padding: 10px 16px;"
+                                >
+                                    🚀 Send Directly to WhatsApp
+                                </button>
+                                <div id="waDirectResultBox" style="font-size: 11.5px; color: var(--muted); margin-top: 4px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Architecture Highlights Banner -->
+                        <div class="dashboard-panel" style="padding: 14px 16px; background: rgba(34, 197, 94, 0.04); border-color: rgba(34, 197, 94, 0.2);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="font-size: 11px; font-weight: 800; color: #22c55e; letter-spacing: 0.5px; text-transform: uppercase;">
+                                    🛡️ Autonomous Margin Protection Active
+                                </div>
+                                <span style="font-size: 11px; color: var(--muted);">Firewall Floor: <strong>₹4,500 INR</strong></span>
+                            </div>
+                            <p style="font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.45;">
+                                AI negotiation checks the merchant's financial safety rules in real-time. If a buyer offers below the configured cost floor, the AI holds firm and offers complimentary accessories instead.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
 
@@ -438,10 +943,6 @@
                             <input class="merchant-input" id="inputFloorPrice" type="number" step="100" min="500" value="4500" placeholder="e.g. 4500" />
                         </div>
                         <div class="merchant-input-group">
-                            <label for="inputRazorpayKey">Razorpay Key ID</label>
-                            <input class="merchant-input" id="inputRazorpayKey" type="text" value="" placeholder="rzp_test_..." />
-                        </div>
-                        <div class="merchant-input-group">
                             <label for="inputWhatsAppPhone">WhatsApp Phone ID</label>
                             <input class="merchant-input" id="inputWhatsAppPhone" type="text" placeholder="e.g. 104829104829104" />
                         </div>
@@ -452,6 +953,42 @@
                             </button>
                         </div>
                     </form>
+
+                    <!-- Server Environment Notice -->
+                    <div style="margin-top: 12px; padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-sm); font-size: 0.76rem; color: var(--text); display: flex; align-items: center; justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #10b981; font-weight: 700;">🔒 Secure Backend Configuration:</span>
+                            <span>Razorpay Key ID, Secret Key, and Webhook Secret are read securely from server <code>.env</code>.</span>
+                        </span>
+                        <span class="channel-status online" style="font-size: 0.68rem; padding: 2px 8px;">ACTIVE</span>
+                    </div>
+
+                    <!-- Dedicated Razorpay Webhook & Test Simulator -->
+                    <div style="margin-top: 16px; padding: 14px 16px; background: rgba(51, 149, 255, 0.05); border: 1px solid rgba(51, 149, 255, 0.25); border-radius: var(--radius-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-weight: 700; color: #3395ff; font-size: 0.88rem;">⚡ Razorpay Webhook Listener & Live Test Tool</span>
+                                <span class="channel-status online" id="webhookStatusBadge" style="font-size: 0.68rem; padding: 2px 6px;">ONLINE</span>
+                            </div>
+                            <span id="webhookActiveSecretStatus" style="font-size: 0.72rem; color: var(--text-muted);">Secret: Auto-Verify</span>
+                        </div>
+                        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">
+                            Set this Webhook URL in your <a href="https://dashboard.razorpay.com/app/webhooks" target="_blank" style="color: #3395ff; text-decoration: underline; font-weight: 600;">Razorpay Dashboard → Settings → Webhooks</a> (select events: <code>payment.captured</code>, <code>order.paid</code>, <code>payment.failed</code>):
+                        </p>
+                        <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
+                            <input id="displayWebhookUrl" type="text" readonly class="merchant-input" style="font-family: monospace; font-size: 0.74rem; background: var(--bg-tertiary); color: var(--text);" value="" />
+                            <button class="button secondary small" id="copyWebhookUrlBtn" type="button" style="white-space: nowrap; font-size: 0.75rem; padding: 6px 12px;">Copy URL</button>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            <button class="button primary small" id="sendTestWebhookSuccessBtn" type="button" style="background: #10b981; border-color: #10b981; font-size: 0.75rem; padding: 6px 12px;">
+                                ▶ Test Webhook: Payment Captured
+                            </button>
+                            <button class="button secondary small" id="sendTestWebhookFailedBtn" type="button" style="font-size: 0.75rem; padding: 6px 12px;">
+                                Test Webhook: Payment Failed
+                            </button>
+                            <span id="webhookTestResult" style="font-size: 0.75rem; font-weight: 600; color: #10b981;"></span>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -497,6 +1034,77 @@
                         </span>
                     </div>
 
+                    <div class="dashboard-metric-card">
+                        <span class="metric-label">
+                            NEGOTIATED DEALS
+                        </span>
+                        <strong id="dashboardNegotiatedDeals" style="color: #10b981;">0</strong>
+                        <span class="metric-meta">
+                            Authorized clearance discounts
+                        </span>
+                    </div>
+
+                    <div class="dashboard-metric-card">
+                        <span class="metric-label">
+                            FIREWALL BLOCKS
+                        </span>
+                        <strong id="dashboardFirewallBlocks" style="color: #ef4444;">0</strong>
+                        <span class="metric-meta">
+                            Sub-floor attempts repelled
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- Predictive Demand Forecasting & Revenue Velocity Intelligence -->
+                <div class="dashboard-panel" style="margin-bottom: 24px;">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <div class="section-label">
+                                PREDICTIVE MERCHANT INTELLIGENCE
+                            </div>
+                            <h3>
+                                Demand Forecasting & Dynamic Price Floor Recommendations
+                            </h3>
+                        </div>
+                        <span class="dashboard-live-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            ● Real-time Velocity Engine
+                        </span>
+                    </div>
+                    <div style="padding: 16px;">
+                        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5;">
+                            Autonomous revenue agents monitor consumer order velocity and inventory exhaustion rates to recommend policy floor adjustments that maximize merchant gross margins without triggering firewall policy violations.
+                        </p>
+                        <div id="demandForecastGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                            <div class="dashboard-empty">Computing real-time demand forecasts...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Autonomous Abandoned Intent & Incomplete Checkout Recovery Engine -->
+                <div class="dashboard-panel" style="margin-bottom: 24px;">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <div class="section-label">
+                                AUTONOMOUS REVENUE RECOVERY
+                            </div>
+                            <h3>
+                                Abandoned Intent & Incomplete Checkout Recovery
+                            </h3>
+                        </div>
+                        <span class="dashboard-live-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">
+                            ● Proactive Conversion Nudge Active
+                        </span>
+                    </div>
+                    <div style="padding: 16px;">
+                        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5;">
+                            Revenue recovery agents proactively monitor pending negotiation and cart checkout intents. Dispatch an automated +3% incentive nudge via WhatsApp or copy a verified recovery link to re-engage prospective buyers.
+                        </p>
+                        <div id="abandonedIntentsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                            <div class="dashboard-empty">All initiated customer intents are currently fulfilled or verified.</div>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -658,7 +1266,19 @@
                                 <label for="inputNewProdStock">Stock Count</label>
                                 <input class="merchant-input" id="inputNewProdStock" type="number" value="25" />
                             </div>
-                            <div class="merchant-input-group" style="justify-content: flex-end; flex-direction: row; gap: 8px;">
+                            <div class="merchant-input-group">
+                                <label for="inputNewProdImage">Product Picture URL</label>
+                                <input class="merchant-input" id="inputNewProdImage" placeholder="https://images.unsplash.com/..." />
+                            </div>
+                            <div class="merchant-input-group" style="grid-column: span 2;">
+                                <label for="inputNewProdDescription">Product Description</label>
+                                <input class="merchant-input" id="inputNewProdDescription" placeholder="Detailed product description and value proposition..." />
+                            </div>
+                            <div class="merchant-input-group" style="grid-column: span 2;">
+                                <label for="inputNewProdSpecs">Specifications (Key: Value, comma separated)</label>
+                                <input class="merchant-input" id="inputNewProdSpecs" placeholder="e.g. Material: Mesh & Steel, Weight: 12kg, Warranty: 3 Years" />
+                            </div>
+                            <div class="merchant-input-group" style="justify-content: flex-end; flex-direction: row; gap: 8px; grid-column: span 2;">
                                 <button class="button" id="cancelAddProdBtn" type="button" style="padding: 8px 12px;">Cancel</button>
                                 <button class="button primary" id="saveNewProdBtn" type="button" style="padding: 8px 14px;">Save to Catalog</button>
                             </div>
@@ -936,6 +1556,7 @@
             </div>
 
             <!-- Policy Floor & Margin Security -->
+            <!-- Margin Security -->
             <div class="control-section" style="margin-top: 14px;">
                 <div class="section-label" style="display: flex; justify-content: space-between; align-items: center;">
                     <span>MARGIN PROTECTION</span>
@@ -954,6 +1575,35 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: var(--muted); font-weight: 600;">Enforcement:</span>
                         <span style="color: var(--accent); font-weight: 700;">Deterministic Enclave</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cryptographic Decision Proof -->
+            <div class="control-section" style="margin-top: 14px;" id="decisionProofSection">
+                <div class="section-label" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>CRYPTOGRAPHIC AUDIT</span>
+                    <span id="proofBadge" style="background: rgba(37,99,235,0.1); color: var(--accent); border: 1px solid rgba(37,99,235,0.2); padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;">SHA-256</span>
+                </div>
+
+                <div style="background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 11px; margin-top: 8px;">
+                    <div style="margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--muted);">Intent Reference:</span>
+                        <code id="inspectorIntentId" style="color: var(--accent); font-weight: 700; font-size: 11px;">#IDLE</code>
+                    </div>
+                    <div style="margin-bottom: 6px;">
+                        <div style="color: var(--muted); margin-bottom: 3px; font-size: 10px;">Contract Hash:</div>
+                        <div id="inspectorHash" style="font-family: monospace; font-size: 9.5px; word-break: break-all; background: var(--panel); padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border); color: var(--text); line-height: 1.3;">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--muted);">Policy Clearance:</span>
+                            <span style="color: var(--success); font-weight: 600;" id="inspectorPolicyStatus">✓ Policy Verified</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--muted);">Floor Margin Guard:</span>
+                            <span style="color: var(--success); font-weight: 600;" id="inspectorFloorStatus">✓ Above Floor</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1019,13 +1669,16 @@
 
             <div class="purchase-card">
 
-                <div class="purchase-product">
+                <div class="purchase-product" style="flex: 1; align-items: flex-start;">
 
-                    <div class="product-icon">
-                        🖱️
+                    <div class="purchase-product-media" id="modalProductMedia">
+                        <img id="modalProductImage" class="modal-product-img" src="" alt="Product Photo" style="display: none;" />
+                        <div id="modalProductIcon" class="product-icon">
+                            📦
+                        </div>
                     </div>
 
-                    <div>
+                    <div style="flex: 1; min-width: 0;">
 
                         <strong id="modalProductName">
                             Product
@@ -1034,6 +1687,10 @@
                         <span id="modalProductReason">
                             Recommended for you
                         </span>
+
+                        <p id="modalProductDesc" class="modal-product-description" style="display: none;"></p>
+
+                        <div id="modalProductSpecs" class="modal-product-specs"></div>
 
                     </div>
 
@@ -1052,6 +1709,41 @@
 
                 </div>
 
+            </div>
+
+            <!-- Customer Shipping & Delivery Details Form -->
+            <div style="margin-top: 10px; padding: 10px 12px; background: var(--panel-2); border-radius: 8px; border: 1px solid var(--border);">
+                <div style="font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px;">
+                    📍 Shipping & Delivery Destination
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
+                    <div>
+                        <label style="display: block; font-size: 10px; color: var(--muted); margin-bottom: 2px;">Full Name</label>
+                        <input type="text" id="modalCustomerName" placeholder="Full Name" value="Kunal Raj" style="width: 100%; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 11.5px;" />
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; color: var(--muted); margin-bottom: 2px;">Email</label>
+                        <input type="email" id="modalCustomerEmail" placeholder="Email" value="kunalraj31012005@gmail.com" style="width: 100%; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 11.5px;" />
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display: block; font-size: 10px; color: var(--muted); margin-bottom: 2px;">Delivery Address</label>
+                        <input type="text" id="modalCustomerAddress" placeholder="Street Address, Flat / Office No" value="100 Innovation Tech Park, Koramangala" style="width: 100%; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 11.5px;" />
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; color: var(--muted); margin-bottom: 2px;">Pincode (6-digit)</label>
+                        <div style="display: flex; gap: 4px;">
+                            <input type="text" id="modalCustomerPincode" maxlength="6" placeholder="Pincode" value="560001" style="width: 100%; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 11.5px;" />
+                            <button type="button" id="modalCheckPincodeBtn" class="button secondary" style="padding: 3px 6px; font-size: 10px; height: 26px;">Verify</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; color: var(--muted); margin-bottom: 2px;">City / State</label>
+                        <input type="text" id="modalCustomerCity" placeholder="City, State" value="Bengaluru, Karnataka" style="width: 100%; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 11.5px;" />
+                    </div>
+                </div>
+                <div id="modalPincodeEstimate" style="margin-top: 6px; font-size: 10.5px; color: var(--success); font-weight: 600;">
+                    ✓ Estimated Delivery: 1–2 Days via BlueDart Air Priority Express (FREE)
+                </div>
             </div>
 
 
@@ -1090,14 +1782,395 @@
                     id="approveButton"
                     type="button"
                 >
-                    Approve & Continue
+                    Proceed to Payment
                     <span>→</span>
                 </button>
 
             </div>
 
+            <!-- Cart Safe Holding Reminder -->
+            <div style="margin-top: 12px; font-size: 11px; text-align: center; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <span>🛡️</span>
+                <span>If you cancel or don't pay now, this item stays safely in your Shopping Cart.</span>
+            </div>
+
         </div>
 
+    </div>
+
+    <!-- =========================================
+         PAYMENT SELECTION GATEWAY MODAL
+    ========================================== -->
+    <div class="modal-overlay hidden" id="paymentModal">
+        <div class="approval-modal" style="max-width: 440px; padding: 20px;">
+            <button class="modal-close" id="closePaymentModal" type="button">×</button>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 10px; font-weight: 800; background: #0c2340; color: #3395ff; border: 1px solid #1d4ed8; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">⚡ RAZORPAY</span>
+                        <span style="font-size: 10.5px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;">STEP 2 OF 2</span>
+                    </div>
+                    <h2 style="font-size: 18px; font-weight: 800; margin-top: 3px;">Select Payment Gateway</h2>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 10px; color: var(--muted);">Amount Payable</div>
+                    <div id="paymentModalAmount" style="font-size: 18px; font-weight: 800; color: var(--accent);">₹0</div>
+                </div>
+            </div>
+
+            <!-- Payment Methods List -->
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                <!-- Option 1: Official Razorpay Standard Checkout (Default) -->
+                <label class="pay-method-option active" data-method="razorpay" style="display: flex; flex-direction: column; border: 1.5px solid var(--accent); border-radius: 10px; padding: 10px 12px; cursor: pointer; background: var(--panel-2); transition: all 0.15s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="radio" name="payOption" value="razorpay" checked style="accent-color: var(--accent);" />
+                            <div style="width: 26px; height: 26px; background: #0c2340; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #3395ff; font-size: 13px; border: 1px solid #1e3a8a;">R</div>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <strong style="font-size: 13px; color: var(--text);">Razorpay Standard Gateway</strong>
+                                    <span style="font-size: 9.5px; background: #0c2340; color: #3395ff; border: 1px solid #1e3a8a; padding: 1px 5px; border-radius: 4px; font-weight: 700;">POPUP MODAL</span>
+                                </div>
+                                <div style="font-size: 11px; color: var(--muted);">Cards, UPI, NetBanking & Wallets via Razorpay modal</div>
+                            </div>
+                        </div>
+                        <span style="font-size: 10px; background: var(--success-soft); color: var(--success); padding: 2px 6px; border-radius: 4px; font-weight: 700;">RECOMMENDED</span>
+                    </div>
+                    <!-- Razorpay Subpanel Details -->
+                    <div class="pay-subpanel" id="razorpaySubpanel" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); margin-bottom: 4px;">
+                            <span>Razorpay Order ID: <code id="razorpayOrderIdDisplay" style="color: var(--accent); font-weight: 600;">order_...</code></span>
+                            <span style="color: var(--success); font-weight: 600;">✓ Live Verified</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--muted); line-height: 1.4;">
+                            Opens the official <strong>Razorpay Checkout Dialog</strong> to pay via UPI (GPay, PhonePe, Paytm, QR), Cards (Visa, RuPay, MC), or NetBanking.
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Option 2: Razorpay UPI Direct -->
+                <label class="pay-method-option" data-method="upi" style="display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; background: var(--panel-2); transition: all 0.15s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="radio" name="payOption" value="upi" style="accent-color: var(--accent);" />
+                            <span style="font-size: 17px;">📱</span>
+                            <div>
+                                <strong style="font-size: 13px; color: var(--text);">Razorpay UPI Direct (GPay / PhonePe / Paytm)</strong>
+                                <div style="font-size: 11px; color: var(--muted);">Instant UPI VPA or QR code scan</div>
+                            </div>
+                        </div>
+                        <span style="font-size: 9.5px; background: var(--panel-3); color: var(--muted); padding: 2px 5px; border-radius: 4px;">0% FEE</span>
+                    </div>
+                    <!-- UPI Details Form -->
+                    <div class="pay-subpanel hidden" id="upiSubpanel" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border);">
+                        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                            <button type="button" class="button secondary upi-app-chip active" data-suffix="@okhdfcbank" style="flex: 1; padding: 4px 6px; font-size: 11px; height: 28px;">GPay</button>
+                            <button type="button" class="button secondary upi-app-chip" data-suffix="@ybl" style="flex: 1; padding: 4px 6px; font-size: 11px; height: 28px;">PhonePe</button>
+                            <button type="button" class="button secondary upi-app-chip" data-suffix="@paytm" style="flex: 1; padding: 4px 6px; font-size: 11px; height: 28px;">Paytm</button>
+                            <button type="button" class="button secondary upi-app-chip" id="toggleQrBtn" style="flex: 1; padding: 4px 6px; font-size: 11px; height: 28px;">QR Code</button>
+                        </div>
+                        <input type="text" id="upiVpaInput" placeholder="Enter UPI ID (e.g. mobile@upi)" value="kunalraj3101@okhdfcbank" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 12px;" />
+                        <div id="upiQrPreview" class="hidden" style="text-align: center; margin-top: 8px; padding: 8px; background: #ffffff; border-radius: 8px; border: 1px solid var(--border);">
+                            <img id="upiQrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=upi%3A%2F%2Fpay%3Fpa%3Dmerchant%40razorpay%26pn%3DEnterpriseCommerce%26am%3D4050%26cu%3DINR" alt="UPI QR Code" style="width: 120px; height: 120px; margin: 0 auto; display: block; border-radius: 6px;" />
+                            <div style="font-size: 10.5px; color: #1e293b; margin-top: 4px; font-weight: 600;">Scan with GPay, PhonePe, Paytm, or CRED</div>
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Option 3: Razorpay Cards Gateway -->
+                <label class="pay-method-option" data-method="card" style="display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; background: var(--panel-2); transition: all 0.15s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="radio" name="payOption" value="card" style="accent-color: var(--accent);" />
+                            <span style="font-size: 17px;">💳</span>
+                            <div>
+                                <strong style="font-size: 13px; color: var(--text);">Razorpay Cards (Credit / Debit)</strong>
+                                <div style="font-size: 11px; color: var(--muted);">Visa, MasterCard, RuPay, Amex • 3D Secure</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card Details Form -->
+                    <div class="pay-subpanel hidden" id="cardSubpanel" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border);">
+                        <input type="text" id="cardNumInput" placeholder="Card Number" value="4242 8888 9999 4242" maxlength="19" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 12px; margin-bottom: 6px;" />
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                            <input type="text" id="cardExpiryInput" placeholder="MM/YY" value="08/29" maxlength="5" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 12px;" />
+                            <input type="password" id="cardCvvInput" placeholder="CVV" value="888" maxlength="4" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 12px;" />
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Option 4: Razorpay Net Banking -->
+                <label class="pay-method-option" data-method="netbanking" style="display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; background: var(--panel-2); transition: all 0.15s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="radio" name="payOption" value="netbanking" style="accent-color: var(--accent);" />
+                            <span style="font-size: 17px;">🏦</span>
+                            <div>
+                                <strong style="font-size: 13px; color: var(--text);">Razorpay Net Banking</strong>
+                                <div style="font-size: 11px; color: var(--muted);">Direct corporate & retail bank transfer</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pay-subpanel hidden" id="netbankingSubpanel" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border);">
+                        <select id="bankSelect" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 12px;">
+                            <option value="HDFC Bank">HDFC Bank</option>
+                            <option value="State Bank of India (SBI)">State Bank of India (SBI)</option>
+                            <option value="ICICI Bank">ICICI Bank</option>
+                            <option value="Axis Bank">Axis Bank</option>
+                            <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                        </select>
+                    </div>
+                </label>
+
+                <!-- Option 5: Cash on Delivery -->
+                <label class="pay-method-option" data-method="cod" style="display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; background: var(--panel-2); transition: all 0.15s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="radio" name="payOption" value="cod" style="accent-color: var(--accent);" />
+                            <span style="font-size: 17px;">💵</span>
+                            <div>
+                                <strong style="font-size: 13px; color: var(--text);">Cash on Delivery (COD)</strong>
+                                <div style="font-size: 11px; color: var(--muted);">Pay cash or UPI upon delivery at doorstep</div>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Security Trust Notice -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 10.5px; color: var(--muted); margin-bottom: 12px;">
+                <span>🔒 256-Bit SSL Encrypted</span>
+                <span>•</span>
+                <span>RBI / PCI-DSS Certified</span>
+                <span>•</span>
+                <span>Powered by Razorpay</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="button secondary" id="backToApprovalBtn" style="height: 38px; font-size: 13px; width: 32%;">← Back</button>
+                <button type="button" class="button primary" id="confirmPaymentBtn" style="height: 38px; font-size: 13px; flex: 1; font-weight: 700; background: #0c2340; border: 1px solid #3395ff; color: #ffffff;">
+                    ⚡ Pay via Razorpay →
+                </button>
+            </div>
+
+            <!-- Cart Safe Holding Reminder -->
+            <div style="margin-top: 10px; font-size: 11px; text-align: center; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <span>🛡️</span>
+                <span>If you close this window, items remain safely in your Shopping Cart for later payment.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         OFFICIAL RAZORPAY CHECKOUT POPUP MODAL
+    ========================================== -->
+    <div class="modal-overlay hidden" id="razorpayOfficialModal">
+        <div style="width: 100%; max-width: 420px; border-radius: 16px; overflow: hidden; background: #ffffff; color: #1e293b; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <!-- Razorpay Navy Header -->
+            <div style="background: #0c2340; color: #ffffff; padding: 18px 20px; position: relative;">
+                <button type="button" id="closeRazorpayModalBtn" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.15); border: none; color: #ffffff; width: 26px; height: 26px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 28px; height: 28px; background: #3395ff; color: #ffffff; font-weight: 900; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px;">R</div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 800; letter-spacing: -0.2px;">Razorpay Secure</div>
+                            <div id="rzpModalStoreName" style="font-size: 11px; opacity: 0.8;">Enterprise Commerce</div>
+                        </div>
+                    </div>
+                    <span style="font-size: 9.5px; background: rgba(51, 149, 255, 0.25); color: #93c5fd; border: 1px solid rgba(51, 149, 255, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: 700;">TEST SANDBOX</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div>
+                        <div style="font-size: 10px; opacity: 0.7; text-transform: uppercase;">Razorpay Order ID</div>
+                        <div id="rzpModalOrderId" style="font-family: monospace; font-size: 11px; color: #93c5fd;">order_...</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 10px; opacity: 0.7; text-transform: uppercase;">Amount to Pay</div>
+                        <div id="rzpModalAmount" style="font-size: 20px; font-weight: 800; color: #34d399;">₹0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Razorpay Modal Body -->
+            <div style="padding: 16px 20px;">
+                <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Select Payment Mode</div>
+                
+                <!-- Razorpay Inner Mode Tabs -->
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="rzp-mode-row active" data-rzp-mode="upi" style="border: 1.5px solid #3395ff; border-radius: 8px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: #f0f7ff;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">📱</span>
+                            <div>
+                                <div style="font-size: 12.5px; font-weight: 700; color: #0c2340;">UPI — Instant Transfer</div>
+                                <div style="font-size: 11px; color: #64748b;">Google Pay, PhonePe, Paytm, BHIM</div>
+                            </div>
+                        </div>
+                        <span style="color: #3395ff; font-weight: 800;">✓</span>
+                    </div>
+
+                    <div class="rzp-mode-row" data-rzp-mode="card" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: #ffffff;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">💳</span>
+                            <div>
+                                <div style="font-size: 12.5px; font-weight: 700; color: #0c2340;">Cards — Debit / Credit</div>
+                                <div style="font-size: 11px; color: #64748b;">Visa, MasterCard, RuPay (Test: 4242••••4242)</div>
+                            </div>
+                        </div>
+                        <span style="color: #cbd5e1; font-weight: 800;">○</span>
+                    </div>
+
+                    <div class="rzp-mode-row" data-rzp-mode="netbanking" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: #ffffff;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">🏦</span>
+                            <div>
+                                <div style="font-size: 12.5px; font-weight: 700; color: #0c2340;">Netbanking</div>
+                                <div style="font-size: 11px; color: #64748b;">All Indian major banks supported</div>
+                            </div>
+                        </div>
+                        <span style="color: #cbd5e1; font-weight: 800;">○</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 14px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; font-size: 11px; color: #64748b; text-align: center;">
+                    🔒 Encrypted transaction verified by Razorpay cryptographic signature.
+                </div>
+
+                <button type="button" id="executeRazorpayModalPayBtn" style="margin-top: 14px; width: 100%; height: 42px; background: #3395ff; color: #ffffff; font-weight: 700; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(51, 149, 255, 0.3);">
+                    <span>Pay with Razorpay</span>
+                    <span id="rzpModalPayBtnAmt">₹0</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         INTERACTIVE PAYMENT AUTHENTICATION MODAL (3D Secure / UPI PIN / Bank OTP)
+         Ensures payment is NOT done directly without realistic interactive authorization
+    ========================================== -->
+    <div class="modal-overlay hidden" id="paymentAuthModal">
+        <div style="width: 100%; max-width: 420px; border-radius: 16px; overflow: hidden; background: #ffffff; color: #1e293b; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <!-- Bank & Gateway Authentication Header -->
+            <div style="background: #0f172a; color: #ffffff; padding: 16px 20px; border-bottom: 3px solid #3395ff;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 18px;">🔒</span>
+                        <div>
+                            <div id="authModalGatewayTitle" style="font-size: 14px; font-weight: 800; letter-spacing: -0.2px;">RBI 3D Secure Authentication</div>
+                            <div style="font-size: 10.5px; color: #94a3b8;">Razorpay Bank Payment Gateway Switch</div>
+                        </div>
+                    </div>
+                    <button type="button" id="closeAuthModalBtn" style="background: rgba(255,255,255,0.1); border: none; color: #ffffff; width: 26px; height: 26px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+                </div>
+                
+                <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.06); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Debiting Account For</div>
+                        <div id="authModalMerchantName" style="font-size: 12px; font-weight: 700; color: #ffffff;">Enterprise AI Commerce</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Amount</div>
+                        <div id="authModalAmount" style="font-size: 18px; font-weight: 800; color: #38bdf8;">₹0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Verification Body -->
+            <div style="padding: 20px;">
+                <!-- Scenario A: UPI PIN Verification -->
+                <div id="authUpiSection">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px; background: #f1f5f9; border-radius: 8px;">
+                        <span style="font-size: 24px;">📱</span>
+                        <div>
+                            <div style="font-size: 12.5px; font-weight: 700; color: #0f172a;">UPI Payment Request Received</div>
+                            <div id="authUpiVpaDisplay" style="font-size: 11px; color: #64748b; font-family: monospace;">kunalraj3101@okhdfcbank</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px; text-transform: uppercase;">Enter 4-Digit UPI PIN to Approve</label>
+                        <input type="password" id="authUpiPinInput" maxlength="6" value="1234" placeholder="••••" style="width: 100%; text-align: center; letter-spacing: 12px; font-size: 20px; font-weight: 800; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; background: #f8fafc; color: #0f172a;" />
+                        <div style="font-size: 10.5px; color: #64748b; margin-top: 5px; text-align: center;">Test UPI PIN pre-filled (<code>1234</code>) • Never share your PIN with anyone</div>
+                    </div>
+                </div>
+
+                <!-- Scenario B: Card / Razorpay 3D Secure OTP -->
+                <div id="authCardSection" class="hidden">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px; background: #f1f5f9; border-radius: 8px;">
+                        <span style="font-size: 24px;">💳</span>
+                        <div>
+                            <div style="font-size: 12.5px; font-weight: 700; color: #0f172a;">3D Secure OTP Authentication</div>
+                            <div id="authCardMasked" style="font-size: 11px; color: #64748b;">OTP sent to registered mobile ending in <strong>•••• 3210</strong></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase;">Enter 6-Digit Bank OTP</label>
+                            <span style="font-size: 11px; color: #3b82f6; font-weight: 600;">Resend OTP in 30s</span>
+                        </div>
+                        <input type="text" id="authCardOtpInput" maxlength="6" value="123456" placeholder="123456" style="width: 100%; text-align: center; letter-spacing: 10px; font-size: 20px; font-weight: 800; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; background: #f8fafc; color: #0f172a;" />
+                        <div style="font-size: 10.5px; color: #64748b; margin-top: 5px; text-align: center;">Verified by Visa / RuPay • Test OTP: <code>123456</code></div>
+                    </div>
+                </div>
+
+                <!-- Scenario C: Netbanking Portal -->
+                <div id="authNetbankingSection" class="hidden">
+                    <div style="margin-bottom: 12px; padding: 10px; background: #f1f5f9; border-radius: 8px;">
+                        <div id="authBankNameDisplay" style="font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">HDFC Bank NetBanking</div>
+                        <div style="font-size: 11px; color: #64748b;">Direct Corporate Gateway Authentication</div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Customer / User ID</label>
+                        <input type="text" id="authNetbankingUser" value="98765432" readonly style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #e2e8f0; font-size: 12px; margin-bottom: 8px;" />
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Transaction Password / OTP</label>
+                        <input type="password" id="authNetbankingPass" value="••••••••" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 12px;" />
+                    </div>
+                </div>
+
+                <!-- Scenario D: Cash on Delivery Verification -->
+                <div id="authCodSection" class="hidden">
+                    <div style="margin-bottom: 12px; padding: 10px; background: #fef3c7; border-radius: 8px; border: 1px solid #fde68a;">
+                        <div style="font-size: 13px; font-weight: 800; color: #92400e;">Doorstep Cash on Delivery</div>
+                        <div style="font-size: 11px; color: #78350f; margin-top: 2px;">Pay full amount via Cash or Doorstep QR upon package delivery.</div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Confirm Delivery Phone Number</label>
+                        <input type="text" id="authCodPhoneInput" value="+91 98765 43210" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 12px;" />
+                    </div>
+                </div>
+
+                <!-- Live Status & Progression Box -->
+                <div id="authLiveStatusBox" class="hidden" style="margin-top: 12px; padding: 10px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe; font-size: 11.5px; color: #1e40af;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 14px; height: 14px; border: 2px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                        <span id="authLiveStatusText" style="font-weight: 600;">Connecting to Banking Switch...</span>
+                    </div>
+                </div>
+
+                <!-- Submit & Cancel Actions -->
+                <div style="display: flex; gap: 8px; margin-top: 16px;">
+                    <button type="button" id="cancelAuthModalBtn" style="padding: 10px 14px; font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; width: 32%;">
+                        Cancel
+                    </button>
+                    <button type="button" id="submitAuthModalBtn" style="flex: 1; padding: 10px 14px; font-size: 13px; font-weight: 700; border-radius: 8px; border: none; background: #2563eb; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);">
+                        <span id="submitAuthBtnLabel">Authorize & Complete Payment →</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         PERSISTENT FLOATING CART WIDGET
+    ========================================== -->
+    <div id="floatingCartWidget" class="hidden" style="position: fixed; bottom: 24px; right: 24px; z-index: 999; background: #0c2340; color: #ffffff; border: 1.5px solid #3395ff; border-radius: 30px; padding: 10px 18px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease;">
+        <div style="font-size: 20px;">🛒</div>
+        <div>
+            <div style="font-size: 10.5px; color: #93c5fd; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Shopping Cart (<span id="floatingCartCount">0</span>)</div>
+            <div style="font-size: 13px; font-weight: 800; color: #ffffff;" id="floatingCartTotal">₹0</div>
+        </div>
+        <div style="background: #3395ff; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 11.5px; font-weight: 700;">View Cart →</div>
     </div>
 
 
@@ -1135,8 +2208,9 @@
                     <span>Order ID: <strong id="invoiceOrderId" style="color: var(--text);"></strong></span>
                     <span>Payment ID: <strong id="invoicePaymentId" style="color: var(--text);"></strong></span>
                 </div>
-                <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between;">
                     <span>Buyer / Customer: <strong id="invoiceBuyerId" style="color: var(--text);"></strong></span>
+                    <span>Payment Method: <strong id="invoicePaymentMethod" style="color: var(--accent);">UPI (Verified)</strong></span>
                 </div>
             </div>
 
@@ -1165,11 +2239,19 @@
             <div style="display: flex; gap: 10px; margin-top: 24px;">
                 <button
                     class="button secondary"
+                    id="invoiceTrackLiveBtn"
+                    style="flex: 1;"
+                    type="button"
+                >
+                    🚚 Track Shipment
+                </button>
+                <button
+                    class="button secondary"
                     id="invoicePrintBtn"
                     style="flex: 1;"
                     type="button"
                 >
-                    🖨️ Print / Save PDF
+                    🖨️ Print PDF
                 </button>
                 <button
                     class="button primary"
@@ -1177,8 +2259,48 @@
                     style="flex: 1;"
                     type="button"
                 >
-                    ⤓ Download Receipt
+                    ⤓ Receipt
                 </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =========================================
+         LIVE SHIPMENT TRACKING MODAL
+    ========================================== -->
+    <div class="modal-overlay hidden" id="trackingModal">
+        <div class="approval-modal" style="max-width: 540px; text-align: left;">
+            <button class="modal-close" id="closeTrackingModal" type="button">×</button>
+            
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div class="modal-icon" style="margin: 0; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-border);">
+                    🚚
+                </div>
+                <div>
+                    <div class="eyebrow" style="margin-bottom: 2px;">LOGISTICS &amp; FULFILLMENT</div>
+                    <h2 style="font-size: 18px; margin: 0;">Live Order Tracking</h2>
+                </div>
+            </div>
+
+            <div style="background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 14px; font-size: 12px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: var(--muted);">Order ID: <strong id="trackingOrderId" style="color: var(--text);">#ORD</strong></span>
+                    <span style="color: var(--muted);">AWB: <strong id="trackingAwb" style="color: var(--text);">BLU123456</strong></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--muted);">Carrier: <strong id="trackingCarrier" style="color: var(--text);">BlueDart Air Priority</strong></span>
+                    <span style="color: var(--muted);">Est. Delivery: <strong id="trackingEstDate" style="color: var(--success);">In 2 Days</strong></span>
+                </div>
+            </div>
+
+            <!-- Tracking Checkpoints Timeline -->
+            <div id="trackingTimeline" style="margin-top: 20px; display: flex; flex-direction: column; gap: 16px;">
+                <!-- Dynamically rendered timeline nodes -->
+            </div>
+
+            <div class="modal-actions" style="margin-top: 24px;">
+                <button class="button secondary" id="closeTrackingBtn" type="button" style="width: 100%;">Close Tracking View</button>
             </div>
         </div>
     </div>
@@ -1206,6 +2328,35 @@
             </div>
         </div>
     </div>
+
+    <!-- =========================================
+         MOBILE BOTTOM NAVIGATION (<= 800px)
+    ========================================== -->
+    <nav class="mobile-nav-bar" id="mobileNavBar">
+        <button class="mobile-nav-item active" id="mobileNavConcierge" type="button">
+            <span class="mobile-nav-icon">✦</span>
+            <span class="mobile-nav-label">Concierge</span>
+        </button>
+        <button class="mobile-nav-item" id="mobileNavCart" type="button">
+            <span class="mobile-nav-icon" style="position: relative;">
+                🛒
+                <span id="mobileCartBadge" class="mobile-badge" style="display: none;">0</span>
+            </span>
+            <span class="mobile-nav-label">Cart</span>
+        </button>
+        <button class="mobile-nav-item" id="mobileNavOrders" type="button">
+            <span class="mobile-nav-icon">◷</span>
+            <span class="mobile-nav-label">Orders</span>
+        </button>
+        <button class="mobile-nav-item" id="mobileNavWhatsApp" type="button">
+            <span class="mobile-nav-icon">💬</span>
+            <span class="mobile-nav-label">WhatsApp</span>
+        </button>
+        <button class="mobile-nav-item" id="mobileNavMerchant" type="button">
+            <span class="mobile-nav-icon">⌁</span>
+            <span class="mobile-nav-label">Merchant</span>
+        </button>
+    </nav>
 
     <!-- Notification Toast Container -->
     <div class="app-toast-container" id="appToastContainer"></div>

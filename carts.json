@@ -1,0 +1,38 @@
+{
+  "test_sess_1": [
+    {
+      "product_id": "HP001",
+      "name": "SoundMax ANC Studio Headphones",
+      "price": 5000,
+      "quantity": 1,
+      "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+      "category": "Headphones"
+    },
+    {
+      "product_id": "MS001",
+      "name": "ProMouse Precision Ergonomic Controller",
+      "price": 1500,
+      "quantity": 1,
+      "image_url": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+      "category": "Mouse"
+    }
+  ],
+  "auto_sync_test": [
+    {
+      "product_id": "HP001",
+      "name": "SoundMax ANC Studio Headphones",
+      "price": 4800,
+      "quantity": 1,
+      "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+      "category": "Headphones"
+    },
+    {
+      "product_id": "MS001",
+      "name": "ProMouse Precision Ergonomic Controller",
+      "price": 1500,
+      "quantity": 1,
+      "image_url": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+      "category": "Mouse"
+    }
+  ]
+}
