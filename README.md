@@ -145,8 +145,16 @@ Upon reaching consensus, the orchestrator suppresses conversational banter and e
 │   ├── intent.py                # Buyer intent structure & state machines
 │   └── order.py                 # Order representations and database schemas
 ├── src/
-│   ├── config.ts                # TypeScript server configuration
-│   └── types.ts                 # Domain interfaces and consensus definitions
+│   ├── db/
+│   │   ├── index.ts             # Resilient Cloud SQL PostgreSQL connection pool (scale-to-zero safe)
+│   │   ├── schema.ts            # Drizzle ORM schemas (merchants, orders, audits, products)
+│   │   ├── queries.ts           # Type-safe database queries and merchant synchronization
+│   │   └── drizzle.config.ts    # Drizzle schema migrations and pool definitions
+│   ├── middleware/
+│   │   └── auth.ts              # Firebase auth token verification and merchant RBAC
+│   └── services/
+│       ├── cartService.ts       # Multi-merchant session shopping cart logic
+│       └── shippingService.ts   # India Post / BlueDart pincode lookup and ETA tracking
 ├── tests/
 │   ├── test_api.py              # API endpoint validation and mock transactions
 │   ├── test_payment.py          # Razorpay signature and checkout unit tests
@@ -198,6 +206,22 @@ cp .env.example .env
 | `RAZORPAY_KEY_SECRET` | Yes | - | Razorpay API Key Secret |
 | `RAZORPAY_WEBHOOK_SECRET`| Optional | - | Webhook HMAC verification secret |
 | `WHATSAPP_VERIFY_TOKEN` | Optional | - | Meta/WhatsApp Webhook token |
+| `SQL_HOST` | Required for DB | `127.0.0.1` | Cloud SQL PostgreSQL host address |
+| `SQL_USER` | Required for DB | `postgres` | PostgreSQL database username |
+| `SQL_PASSWORD` | Required for DB | - | PostgreSQL database user password |
+| `SQL_DB_NAME` | Required for DB | `commerce_db` | PostgreSQL database instance name |
+
+---
+
+### Cloud SQL Resilient Connection Pooling
+
+In serverless and scale-to-zero environments (such as Google Cloud SQL Developer tier), the database server automatically reaps idle connections with PostgreSQL termination code `57P01` (`terminating connection due to administrator command`).
+
+The engine is engineered with resilient pooling in `src/db/index.ts`:
+- **Dynamic Connection Scale (`min: 0`)**: Connections scale to zero during inactivity so the database can hibernate or rotate cleanly.
+- **Client-Side Idle Eviction (`idleTimeoutMillis: 10000`)**: Idle connections are retired client-side before server administrator timeouts trigger.
+- **Graceful Lifecycle Interception**: Benign administrator reap events (`57P01`, `ECONNRESET`) are handled gracefully without application crashes or fatal error logs.
+- **Automatic On-Demand Reconnection**: Fresh connections are provisioned automatically whenever subsequent queries arrive.
 
 ---
 
