@@ -16,9 +16,10 @@
     return scripts[scripts.length - 1];
   })();
 
-  const apiHost = (currentScript && currentScript.src)
-    ? new URL(currentScript.src).origin
-    : window.location.origin;
+  const apiHost = window.COMMERCE_BACKEND_URL ||
+    ((currentScript && currentScript.src && currentScript.src.startsWith('http'))
+      ? new URL(currentScript.src).origin
+      : (window.location.origin && window.location.origin !== 'null' ? window.location.origin : 'https://ai-commerce-engine-frontend.onrender.com'));
 
   // Create isolated container
   const container = document.createElement('div');

@@ -27,7 +27,20 @@ export interface CartSummary {
   item_count: number;
 }
 
-const CARTS_FILE = path.resolve(process.cwd(), "carts.json");
+const DATA_DIR = path.resolve(process.cwd(), "backend", "data");
+if (!fs.existsSync(DATA_DIR)) {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {
+    // ignore
+  }
+}
+
+const PRIMARY_CARTS_FILE = path.join(DATA_DIR, "carts.json");
+const LEGACY_CARTS_FILE = path.resolve(process.cwd(), "carts.json");
+const CARTS_FILE = (!fs.existsSync(PRIMARY_CARTS_FILE) && fs.existsSync(LEGACY_CARTS_FILE))
+  ? LEGACY_CARTS_FILE
+  : PRIMARY_CARTS_FILE;
 
 // Persistent cart store per session
 let carts: Record<string, CartItem[]> = {};

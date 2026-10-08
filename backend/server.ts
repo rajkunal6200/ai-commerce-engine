@@ -24,10 +24,18 @@ import { getCart, addToCart, updateCartItemQuantity, clearCart } from "./service
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const HOST = "0.0.0.0";
 
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow all origins (including ai-commerce-engine-frontend.onrender.com and localhost)
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
+}));
 app.use(express.json({
   verify: (req: any, _res, buf) => {
     req.rawBody = buf;
@@ -383,10 +391,32 @@ const STOP_WORDS = new Set([
 // PERSISTENCE HELPERS
 // ============================================================
 
-const INTENTS_FILE = path.join(process.cwd(), "intents.json");
-const AUDIT_LOGS_FILE = path.join(process.cwd(), "audit_logs.json");
-const WEBHOOK_EVENTS_FILE = path.join(process.cwd(), "webhook_events.json");
-const STORES_CONFIG_FILE = path.join(process.cwd(), "stores_config.json");
+// Data and configuration storage locations
+const DATA_DIR = path.join(process.cwd(), "backend", "data");
+const CONFIG_DIR = path.join(process.cwd(), "backend", "config");
+
+// Ensure directories exist
+try {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
+} catch (e) {
+  // directory might already exist
+}
+
+// Resolve paths with legacy fallbacks if needed
+function resolvePath(dir: string, filename: string): string {
+  const primaryPath = path.join(dir, filename);
+  const legacyRootPath = path.join(process.cwd(), filename);
+  if (fs.existsSync(legacyRootPath) && !fs.existsSync(primaryPath)) {
+    return legacyRootPath;
+  }
+  return primaryPath;
+}
+
+const INTENTS_FILE = resolvePath(DATA_DIR, "intents.json");
+const AUDIT_LOGS_FILE = resolvePath(DATA_DIR, "audit_logs.json");
+const WEBHOOK_EVENTS_FILE = resolvePath(DATA_DIR, "webhook_events.json");
+const STORES_CONFIG_FILE = resolvePath(CONFIG_DIR, "stores_config.json");
 
 export interface MerchantStoreConfig {
   store_id: string;

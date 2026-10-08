@@ -1,5 +1,6 @@
 # Autonomous Dynamic Commerce Orchestrator & Multi-Agent Negotiation Engine
 
+[![Live on Render](https://img.shields.io/badge/Render-Live%20Deployment-46E3B7.svg?logo=render&logoColor=white)](https://ai-commerce-engine-frontend.onrender.com)
 [![Build & Tests](https://github.com/your-org/autonomous-commerce-orchestrator/actions/workflows/tests.yml/badge.svg)](https://github.com/your-org/autonomous-commerce-orchestrator/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg?logo=node.js)](https://nodejs.org/)
@@ -8,6 +9,7 @@
 [![Governance](https://img.shields.io/badge/Quorum-3--Agent%20Consensus-emerald.svg)](#3-agent-quorum-consensus)
 [![Security](https://img.shields.io/badge/Security-Financial%20Firewall%20Enforced-red.svg)](#security--governance-architecture)
 
+> 🌐 **Live Production Link**: **[https://ai-commerce-engine-frontend.onrender.com](https://ai-commerce-engine-frontend.onrender.com)**  
 > **Enterprise-grade autonomous commerce orchestrator featuring dynamic margin protection firewalls, 3-agent multi-model quorum consensus, deterministic Razorpay checkout delegation, and multi-channel conversational shopping (Web + WhatsApp).**
 
 ---
@@ -137,6 +139,9 @@ Upon reaching consensus, the orchestrator suppresses conversational banter and e
 │       └── tests.yml            # CI pipeline executing automated Python test suites
 ├── backend/                     # All Backend Server, Services, DB & Logic
 │   ├── server.ts                # Production TypeScript/Express orchestrator & API routes
+│   ├── config/                  # Configuration files
+│   │   └── stores_config.json   # Store settings and floor price threshold configurations
+│   ├── data/                    # Runtime state data (ignored by git: carts.json, intents.json, etc.)
 │   ├── db/
 │   │   ├── index.ts             # Resilient Cloud SQL PostgreSQL connection pool (scale-to-zero safe)
 │   │   ├── schema.ts            # Drizzle ORM schemas (merchants, orders, audits, products)
@@ -149,7 +154,7 @@ Upon reaching consensus, the orchestrator suppresses conversational banter and e
 │   │   └── shippingService.ts   # India Post / BlueDart pincode lookup and ETA tracking
 │   ├── lib/
 │   │   └── firebase-admin.ts    # Resilient Firebase Admin initialization with config fallbacks
-│   └── python/                  # Legacy Python/FastAPI engine and contracts
+│   └── python/                  # Python financial & policy engine
 │       ├── main.py              # FastAPI core engine and quorum validation routes
 │       ├── payment.py           # Razorpay API client and webhook signature verifier
 │       ├── policy.py            # Financial firewall rules and corporate floor checks
@@ -162,10 +167,10 @@ Upon reaching consensus, the orchestrator suppresses conversational banter and e
 │   ├── widget.js                # Autonomous shopping widget embed
 │   └── style.css                # Modern responsive UI design styles
 ├── .env.example                 # Template for required environment variables
-├── .gitignore                   # Enterprise exclusion of secrets, state, and build artifacts
+├── .gitignore                   # Enterprise exclusion of secrets, state, lockfiles, and build artifacts
 ├── metadata.json                # AI Studio application metadata
 ├── package.json                 # Node.js dependencies and compilation scripts
-├── server.ts                    # Root server entrypoint (delegates to backend/server.ts)
+├── render.yaml                  # Cloud deployment configuration for Render
 └── tsconfig.json                # TypeScript compiler configuration
 ```
 
@@ -253,6 +258,29 @@ The server starts at `http://localhost:3000` with hot-reloading and live compila
 ```bash
 npm run build
 npm start
+```
+
+### 4. Live Cloud Deployment on Render
+
+The application is deployed live on Render:
+- **Live URL**: **[https://ai-commerce-engine-frontend.onrender.com](https://ai-commerce-engine-frontend.onrender.com)**
+- **Health Check**: `https://ai-commerce-engine-frontend.onrender.com/health`
+- **Webhook Endpoint**: `https://ai-commerce-engine-frontend.onrender.com/webhooks/razorpay`
+
+#### Render Web Service Configuration
+| Parameter | Value |
+|---|---|
+| **Environment** | Node |
+| **Build Command** | `npm install && npm run build` |
+| **Start Command** | `npm start` (or `node dist/server.cjs`) |
+| **Port Detection** | Automatically binds to dynamic `PORT` env var (fallback: 3000) |
+| **Health Check Path** | `/health` |
+
+#### Storefront Embeddable Script
+External e-commerce storefronts (Shopify, WooCommerce, Webflow, custom HTML) can embed the autonomous concierge widget directly using:
+
+```html
+<script src="https://ai-commerce-engine-frontend.onrender.com/widget.js"></script>
 ```
 
 ---

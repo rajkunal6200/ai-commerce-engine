@@ -3,8 +3,11 @@
 // Frontend Application
 // ============================================================
 
-// Backend URL
-const API_BASE_URL = window.location.origin;
+// Backend URL: Auto-resolves current origin, supports custom backend override, or live Render deployment
+const LIVE_RENDER_URL = "https://ai-commerce-engine-frontend.onrender.com";
+const API_BASE_URL = window.COMMERCE_BACKEND_URL ||
+                     localStorage.getItem("commerce_backend_url") ||
+                     window.location.origin;
 
 
 // ============================================================
@@ -4051,6 +4054,20 @@ document.getElementById("copyWebhookUrlBtn")?.addEventListener("click", () => {
             input.select();
             document.execCommand("copy");
             showToast("Razorpay Webhook URL copied!", "success");
+        });
+    }
+});
+
+// Wire up Storefront Concierge Widget Script Copy Button
+document.getElementById("copyWidgetEmbedBtn")?.addEventListener("click", () => {
+    const input = document.getElementById("displayWidgetEmbedSnippet");
+    if (input && input.value) {
+        navigator.clipboard.writeText(input.value).then(() => {
+            showToast("Widget drop-in snippet copied to clipboard!", "success");
+        }).catch(() => {
+            input.select();
+            document.execCommand("copy");
+            showToast("Widget snippet copied!", "success");
         });
     }
 });

@@ -55,9 +55,16 @@ intents.json
 audit_logs.json
 persistence_logs.json
 webhook_events.json
+backend/data/
 *.sqlite
 *.db
 *.sqlite3
+
+# ============================================================
+# Lockfiles (Use package.json / npm)
+# ============================================================
+bun.lock
+bun.lockb
 
 # ============================================================
 # Operating System & IDE Artifacts
