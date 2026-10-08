@@ -22,7 +22,7 @@ if (!password) {
 }
 
 export default defineConfig({
-  schema: "./src/db/schema.ts",
+  schema: "./backend/db/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
   schemaFilter: ["public"],

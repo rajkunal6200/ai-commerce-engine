@@ -135,16 +135,8 @@ Upon reaching consensus, the orchestrator suppresses conversational banter and e
 ├── .github/
 │   └── workflows/
 │       └── tests.yml            # CI pipeline executing automated Python test suites
-├── frontend/
-│   ├── app.js                   # Client logic, theme manager, telemetry, order ledger
-│   ├── index.html               # Responsive single-page interface with dual-theme styling
-│   ├── modal.js                 # Approval and transaction modal controllers
-│   └── razorpay-checkout.js     # Client Razorpay checkout integration
-├── models/
-│   ├── bundle.py                # Bundle data models and catalog schemas
-│   ├── intent.py                # Buyer intent structure & state machines
-│   └── order.py                 # Order representations and database schemas
-├── src/
+├── backend/                     # All Backend Server, Services, DB & Logic
+│   ├── server.ts                # Production TypeScript/Express orchestrator & API routes
 │   ├── db/
 │   │   ├── index.ts             # Resilient Cloud SQL PostgreSQL connection pool (scale-to-zero safe)
 │   │   ├── schema.ts            # Drizzle ORM schemas (merchants, orders, audits, products)
@@ -152,22 +144,28 @@ Upon reaching consensus, the orchestrator suppresses conversational banter and e
 │   │   └── drizzle.config.ts    # Drizzle schema migrations and pool definitions
 │   ├── middleware/
 │   │   └── auth.ts              # Firebase auth token verification and merchant RBAC
-│   └── services/
-│       ├── cartService.ts       # Multi-merchant session shopping cart logic
-│       └── shippingService.ts   # India Post / BlueDart pincode lookup and ETA tracking
-├── tests/
-│   ├── test_api.py              # API endpoint validation and mock transactions
-│   ├── test_payment.py          # Razorpay signature and checkout unit tests
-│   ├── test_persistence.py      # Ledger persistence and mutation block testing
-│   └── test_webhook.py          # Razorpay webhook HMAC validation tests
+│   ├── services/
+│   │   ├── cartService.ts       # Multi-item session shopping cart & bundle discount logic
+│   │   └── shippingService.ts   # India Post / BlueDart pincode lookup and ETA tracking
+│   ├── lib/
+│   │   └── firebase-admin.ts    # Resilient Firebase Admin initialization with config fallbacks
+│   └── python/                  # Legacy Python/FastAPI engine and contracts
+│       ├── main.py              # FastAPI core engine and quorum validation routes
+│       ├── payment.py           # Razorpay API client and webhook signature verifier
+│       ├── policy.py            # Financial firewall rules and corporate floor checks
+│       ├── requirements.txt     # Python runtime dependencies
+│       ├── models/              # Pydantic schemas (intent, approval, audit, catalog, etc.)
+│       └── tests/               # Pytest automated test suites
+├── frontend/                    # All Frontend Web Assets & Client Applications
+│   ├── index.html               # Responsive single-page interface with dual-theme styling
+│   ├── app.js                   # Client logic, theme manager, telemetry, order ledger
+│   ├── widget.js                # Autonomous shopping widget embed
+│   └── style.css                # Modern responsive UI design styles
 ├── .env.example                 # Template for required environment variables
-├── .gitignore                   # Rigorous exclusion of secrets, logs, and artifacts
-├── main.py                      # FastAPI core engine and quorum validation routes
+├── .gitignore                   # Enterprise exclusion of secrets, state, and build artifacts
+├── metadata.json                # AI Studio application metadata
 ├── package.json                 # Node.js dependencies and compilation scripts
-├── payment.py                   # Razorpay API client and webhook signature verifier
-├── policy.py                    # Financial firewall rules and corporate floor checks
-├── requirements.txt             # Python runtime dependencies
-├── server.ts                    # Production TypeScript/Express orchestrator server
+├── server.ts                    # Root server entrypoint (delegates to backend/server.ts)
 └── tsconfig.json                # TypeScript compiler configuration
 ```
 
@@ -175,10 +173,10 @@ Upon reaching consensus, the orchestrator suppresses conversational banter and e
 
 ## 5. Security & Governance Architecture
 
-### Strict GitHub Push Protection (Safe by Design)
+### Strict Git Push Protection (Safe by Design)
 This repository includes a strict security policy configured in `.gitignore`:
 - **Zero Secret Exposure**: `.env`, credentials, private keys (`.pem`, `.key`), and certificates are strictly ignored.
-- **No Runtime State in Git**: Transaction logs (`intents.json`, `audit_logs.json`, `persistence_logs.json`) are blocked from commits.
+- **No Runtime State in Git**: Transaction logs and session carts (`carts.json`, `intents.json`, `audit_logs.json`, `persistence_logs.json`) are blocked from commits.
 - **No Build Artifacts**: `node_modules/`, `dist/`, and virtual environments (`.venv/`) are excluded.
 
 ### Threat Model & Safeguards
@@ -217,7 +215,7 @@ cp .env.example .env
 
 In serverless and scale-to-zero environments (such as Google Cloud SQL Developer tier), the database server automatically reaps idle connections with PostgreSQL termination code `57P01` (`terminating connection due to administrator command`).
 
-The engine is engineered with resilient pooling in `src/db/index.ts`:
+The engine is engineered with resilient pooling in `backend/db/index.ts`:
 - **Dynamic Connection Scale (`min: 0`)**: Connections scale to zero during inactivity so the database can hibernate or rotate cleanly.
 - **Client-Side Idle Eviction (`idleTimeoutMillis: 10000`)**: Idle connections are retired client-side before server administrator timeouts trigger.
 - **Graceful Lifecycle Interception**: Benign administrator reap events (`57P01`, `ECONNRESET`) are handled gracefully without application crashes or fatal error logs.

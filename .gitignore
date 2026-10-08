@@ -16,6 +16,10 @@ id_ed25519*
 serviceAccount*.json
 credentials*.json
 firebase-applet-config.json
+firebase_applet_config.xml
+.dev.env.json
+.dev.pid
+.cloud_sql_proxy.pid
 
 # ============================================================
 # Dependencies & Build Output
@@ -44,8 +48,9 @@ ENV/
 htmlcov/
 
 # ============================================================
-# Runtime State & Transaction Logs
+# Runtime Session State & Ephemeral Transaction Logs
 # ============================================================
+carts.json
 intents.json
 audit_logs.json
 persistence_logs.json
