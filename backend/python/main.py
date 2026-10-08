@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import Any, Optional, Union, List, Dict, Tuple
 
 from models.intent import IntentContract
 from models.approval import ApprovalRequest
